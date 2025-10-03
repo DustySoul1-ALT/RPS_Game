@@ -1,10 +1,26 @@
+// Fate of Fists made by Mukilan M.
+// Inspiried by A Dark Room by DoubleSpeak
+
 const db = [];
 const choiceChars = [r, p, s];
 const ynChars = [y, n];
 const menuChars = [s, p, c];
 const stRoomChars = [s, e, c];
-let roomNum = 0;
+const Room = (() => {
+  let roomNum = 0; // private
+  return {
+    get: () => roomNum,
+    set: (val) => { if (typeof val === 'number') roomNum = val; }
+  };
+})();
 
+function saveData(profile, data) {
+  const saveKey = profile;
+  localStorage.setItem(profile, JSON.stringify(data))
+}
+function loadData(profile) {
+  return JSON.parse(localStorage.getItem(profile));
+}
 function generateRanNum(min, max) {
     min = Math.ceil(min);
     max = Math.ceil(max);
@@ -147,10 +163,11 @@ const enimies = {
     }
 }
 function newRoom() {
-  if(roomNum === 0) return;
-  const enemyNum = generateRanNum(1, roomNum);
-  let enemyID = weightedRandom([roomNum * 2, roomNum * 5, roomNum * 10, roomNum * 25]);
+  if(Room.get() === 0) return;
+  const enemyNum = generateRanNum(1, Room.get());
+  let enemyID = weightedRandom([Room.get() * 2, Room.get() * 5, Room.get() * 10, Room.get() * 25]);
   enimies[enemyID]();
-  roomNum++;
+  Room.set(Room.get() + 1);
 }
+
 menuC.menu();
