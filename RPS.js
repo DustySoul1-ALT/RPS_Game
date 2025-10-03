@@ -2,10 +2,10 @@
 // Inspiried by A Dark Room by DoubleSpeak
 
 const db = [];
-const choiceChars = [r, p, s];
-const ynChars = [y, n];
-const menuChars = [s, p, c];
-const stRoomChars = [s, e, c];
+const choiceChars = ["r", "p", "s"];
+const ynChars = ["y", "n"];
+const menuChars = ["s", "p", "c"];
+const stRoomChars = ["s", "e", "c"];
 const Room = (() => {
   let roomNum = 0; // private
   return {
