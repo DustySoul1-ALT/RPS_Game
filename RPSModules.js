@@ -84,7 +84,7 @@ function weightedRandom(weights) {
   }
   return weights.length - 1; // fallback to last index
 }
-function newRoom() {
+function newRoom(Room) {
   if (Room.get() === 0) return;
   // Pick an enemy ID using weighted randomness
   let enemyID = weightedRandom([
@@ -126,10 +126,10 @@ const choice = {
   }
 };
 const menuC = {
-  menu: function(Profiles) {
+  menu: function(Profiles, Room) {
     const menuChoice = choice.menu();
     if (menuChoice === "s") { newRoom(); }
-    if (menuChoice === "p") { menuC.changeProfile(Profiles); }
+    if (menuChoice === "p") { menuC.changeProfile(Room); }
     if (menuChoice === "c") { menuC.credits(); }
   },
   changeProfile: function(profiles) {
