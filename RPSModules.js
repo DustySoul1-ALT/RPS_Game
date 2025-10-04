@@ -84,6 +84,20 @@ function weightedRandom(weights) {
   }
   return weights.length - 1; // fallback to last index
 }
+function newRoom() {
+  if (Room.get() === 0) return;
+  // Pick an enemy ID using weighted randomness
+  let enemyID = weightedRandom([
+    Room.get() * 2,   // Hammer
+    Room.get() * 5,   // Wanderer
+    Room.get() * 10,  // Mini Boss
+    Room.get() * 25   // Boss
+  ]);
+  // Call the enemy’s function
+  enimies[enemyID]();
+  // Move to the next room
+  Room.set(Room.get() + 1);
+}
 const choice = {
   menu: function() {
     let c = prompt("Choose: s for start, p for changing profile, c for credits").toLowerCase();
@@ -112,10 +126,10 @@ const choice = {
   }
 };
 const menuC = {
-  menu: function(newRoom) {
+  menu: function(Profiles) {
     const menuChoice = choice.menu();
     if (menuChoice === "s") { newRoom(); }
-    if (menuChoice === "p") { menuC.changeProfile(); }
+    if (menuChoice === "p") { menuC.changeProfile(Profiles); }
     if (menuChoice === "c") { menuC.credits(); }
   },
   changeProfile: function(profiles) {
@@ -172,4 +186,4 @@ const enimies = {
 
 
 // Export
-export { saveData, loadData, generateRanNum, findChoices, pickChoice, RPS, compare, weightedRandom, choice, menuC, enimies };
+export { saveData, loadData, generateRanNum, findChoices, pickChoice, RPS, compare, weightedRandom, choice, menuC, enimies, newRoom };
