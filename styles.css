@@ -1,6 +1,25 @@
 body {
+  text-align: center;
+}
+
+.ubuntu-regular {
   font-family: "Ubuntu", sans-serif;
   font-weight: 400;
   font-style: normal;
-  text-align: center;
+}
+.typewriter {
+  display: inline-block;
+  font-size: 20px;
+  color: #00ff99;
+  white-space: pre; /* keeps spaces and line breaks */
+  overflow: hidden;
+  border-right: 2px solid #00ff99;
+  animation: blink 0.75s step-end infinite;
+  letter-spacing: 0.5px;
+}
+
+@keyframes blink {
+  50% {
+    border-color: transparent;
+  }
 }
