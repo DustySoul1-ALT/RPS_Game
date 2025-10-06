@@ -20,9 +20,19 @@ const Profiles = (() => {
 })();
 const hp = (() => {
   let hpVal = 5; // private
+  let maxHP = 5;
+  const hpS = document.getElementById("hp");
   const api = {
     get: () => hpVal,
-    set: (val) => { if (typeof val === 'number') hpVal = val; }
+    set: (val) => {
+      if (typeof val === 'number') hpVal = val;
+      hpS.textContent = 'HP: ' + hpVal + '/' + maxHP;
+    },
+    getMax: () => maxHP,
+    setMax: (val) => {
+      if (typeof val === "number") maxHP = val;
+      hpS.textContent = 'HP: ' + hpVal + '/' + maxHP;
+    }
   };
   return Object.freeze(api);
 })();
@@ -33,9 +43,6 @@ const gameState = (() => {
     set: (val) => { state = val; }
   });
 })
-
-// Modules for Fate of the Fists game
-
 // Database
 const GameDB = (() => {
   const db = [];
@@ -108,9 +115,45 @@ async function loadData(profile) {
     return null;
   }
 }
+async function keyPress() {
+  return new Promise(resolve => {
+    function handler(e) {
+      const input = e.key?.toLowerCase() || e.target?.value?.toLowerCase();
+      if (validInputs.includes(input)) {
+        document.removeEventListener("keydown", handler);
+        resolve(input);
+      }
+    }
+    document.addEventListener("keydown", handler);
+  });
+}
 function writer(text, speed = 60) {
   return new Promise((resolve) => {
     const el = document.getElementById("writer");
+    if (!el || typeof text !== "string") {
+      console.error("Text or writer element not present");
+      return resolve(); // resolve anyway to avoid hanging
+    }
+
+    el.textContent = "";
+    let i = 0;
+
+    function type() {
+      if (i < text.length) {
+        el.textContent += text.charAt(i);
+        i++;
+        setTimeout(type, speed);
+      } else {
+        resolve(); // ✅ done typing
+      }
+    }
+
+    type();
+  });
+}
+function choices(text, speed = 60) {
+  return new Promise((resolve) => {
+    const el = document.getElementById("choices");
     if (!el || typeof text !== "string") {
       console.error("Text or writer element not present");
       return resolve(); // resolve anyway to avoid hanging
@@ -157,8 +200,9 @@ function findChoices() {
     }
     return top3;
 }
-function pickChoice() {
-  const pChoice = choice.RPS();
+function pickChoice() {/
+  choices("Press one of the following keys: R for rock, P for paper, S for scissors")
+  const pChoice = keyPress(choiceChars);
   if (!choiceChars.includes(choice)) { return };
   return {
     rChoice: function() { return findChoices(); },
@@ -206,16 +250,20 @@ async function outCome(outcome, enemy) {
       id = -1;
   }
   if (outcome === true) {
-    hp.set(hp.get() + 1);
-    await writer(`You won against a ${enemy}! You gained 1 HP. Current HP: ${hp.get()}`, 60);
-    Room.set(Room.get() + 1);
+    if (hp.get() < hp.getMax()) {
+      hp.set(hp.get() + 1);
+      await writer(`You won against a ${enemy}! You gained 1 HP. Current HP: ${hp.get()}`, 60);
+    }
+    if (hp.get() === hp.getMax) {
+      await writer('You won against a ' + enemy + '! But you are already at max hp. ' + hp.get() + '/' + hp.getMax())
+    }
   } else if (outcome === false) {
     hp.set(hp.get() - 1);
     if (hp.get() > 0) {
       await writer(`You lost against a ${enemy}! You lost 1 HP. Current HP: ${hp.get()}`);
     }
     if (hp.get() === 0) {
-      await writer(`You lost against a ${enemy} and have 0 HP left. You have died. Game Over! Refresh the page to play again.`, 60);
+      await writer(`You lost against a ${enemy} and have 0 HP left. You have died. Game Over!`, 60);
       Room.set(0);
     }
   } else if (outcome === "tie") {
@@ -259,45 +307,33 @@ const enimies = {
     await outCome(outcome, "Goblin");
   },
 }
-function newRoom() {
-  if (Room.get() === 0) { Room.set(1); }
+async function newRoom() {
+  if (Room.get() === 0) {
+    Room.set(1);
+  }
   const enemyChance = {
     boss: function() {
-      let enemyChance = 0;
-      if (Room.get() * 2 < 50) {
-        enemyChance = Room.get() * 2;
-      } else if (Room.get() * 2 > 50) {
-        enemyChance = 50;
-      }
-      return enemyChance;
+      return Math.min(Room.get() * 2, 50);
     },
     miniBoss: function() {
-      let enemyChance = 0;
-      if (Room.get() * 4 < 60) {
-        enemyChance = Room.get() * 4;
-      } else if (Room.get() * 2 > 60) {
-        enemyChance = 60;
-      }
-      return enemyChance;
+      return Math.min(Room.get() * 4, 60);
     },
     wanderer: function() {
-      let enemyChance = 0;
-      if (Room.get() * 5 < 70) {
-        enemyChance = Room.get() * 5;
-      } else if (Room.get() * 2 > 70) {
-        enemyChance = 70;
-      }
-      return enemyChance;
+      return Math.min(Room.get() * 5, 70);
     },
     goblin: function() {
-      let enemyChance = 0;
-      if (Room.get() * 6 < 75) {
-        enemyChance = Room.get() * 6;
-      } else if (Room.get() * 6 > 75) {
-        enemyChance = 75;
-      }
-      return enemyChance;
+      return Math.min(Room.get() * 6, 75);
     },
-  };
-  enimies[weightedRandom([enemyChance.goblin(), enemyChance.wanderer(), enemyChance.miniBoss(), enemyChance.boss()])]();
+  }
+  const enemyNum = generateRanNum(1, Math.min(Room.get(), 10));
+  
+  for (let i = 0; i < enemyNum; i++) {
+    const pick = weightedRandom([
+      enemyChance.goblin(), 
+      enemyChance.wanderer(), 
+      enemyChance.miniBoss(), 
+      enemyChance.boss()
+    ]);
+    enimies[pick]();
+  }
 }
