@@ -292,7 +292,8 @@ const enimies = {
     await outCome(null, "Boss");
     const pick = pickChoice();
     const choice = pick.rChoice()[weightedRandom([33, 33, 33])];
-    const outcome = compare(pick.pChoice(), choice);
+    const pChoice = await pick.pChoice();
+    const outcome = compare(pChoice, choice);
     await outCome(outcome, "Boss");
   },
   // Mini Boss
@@ -300,7 +301,8 @@ const enimies = {
     await outCome(null, "Mini Boss");
     const pick = pickChoice();
     const choice = pick.rChoice()[weightedRandom([34, 34, 32])];
-    const outcome = compare(pick.pChoice(), choice);
+    const pChoice = await pick.pChoice();
+    const outcome = compare(pChoice, choice);
     await outCome(outcome, "Mini Boss");
   },
   // Wanderer
@@ -308,7 +310,8 @@ const enimies = {
     await outCome(null, "Wanderer");
     const pick = pickChoice();
     const choice = pick.rChoice()[weightedRandom([32, 35, 33])];
-    const outcome = compare(pick.pChoice(), choice);
+    const pChoice = await pick.pChoice();
+    const outcome = compare(pChoice, choice);
     await outCome(outcome, "Wanderer");
   },
   // Goblin
@@ -316,7 +319,8 @@ const enimies = {
     await outCome(null, "Goblin");
     const pick = pickChoice();
     const choice = pick.rChoice()[weightedRandom([32, 33, 35])];
-    const outcome = compare(pick.pChoice(), choice);
+    const pChoice = await pick.pChoice();
+    const outcome = compare(pChoice, choice);
     await outCome(outcome, "Goblin");
   },
 }
