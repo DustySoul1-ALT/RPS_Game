@@ -115,7 +115,21 @@ async function loadData(profile) {
     return null;
   }
 }
-async function keyPress() {
+function tween(v1, v2, time) {
+  let val = v1 - v2;
+  let rate = val / time;
+  while (Math.abs(v1 - v2) > 0.001) {
+    if (v1 > v2) {
+      val = val + rate;
+      v2 = val;
+    }
+    if (v1 < v2) {
+      val = val - rate;
+      v2 = val;
+    }
+  }
+}
+async function keyPress(validInputs) {
   return new Promise(resolve => {
     function handler(e) {
       const input = e.key?.toLowerCase() || e.target?.value?.toLowerCase();
@@ -200,10 +214,9 @@ function findChoices() {
     }
     return top3;
 }
-function pickChoice() {/
+function pickChoice() {
   choices("Press one of the following keys: R for rock, P for paper, S for scissors")
   const pChoice = keyPress(choiceChars);
-  if (!choiceChars.includes(choice)) { return };
   return {
     rChoice: function() { return findChoices(); },
     pChoice: function() { return pChoice; }
@@ -331,9 +344,11 @@ async function newRoom() {
     const pick = weightedRandom([
       enemyChance.goblin(), 
       enemyChance.wanderer(), 
-      enemyChance.miniBoss(), 
-      enemyChance.boss()
+      enemyChance.miniBoss()
     ]);
-    enimies[pick]();
+    await enimies[pick]();
   }
+  setTimeout(newRoom, 500)
 }
+
+newRoom();
