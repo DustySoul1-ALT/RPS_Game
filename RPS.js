@@ -181,6 +181,7 @@ function writer(text, speed = 120) {
   return new Promise(resolve => {
     const el = document.getElementById("writer");
     if (!el) return resolve();
+    if (el.textContent === text) return resolve;
     el.textContent = "";
     let i = 0;
     function type() {
