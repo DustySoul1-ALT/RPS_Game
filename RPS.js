@@ -1,6 +1,5 @@
 // Fate of Fists made by Mukilan M.
-// Inspired by A Dark Room by DoubleSpeak Games
-
+// Inspired by A Dark Room by DoubleSpeak Games and Hades by Supergiant games
 // --- Game Vars with Closures ---
 const Room = (() => {
   let roomNum = 0;
@@ -212,7 +211,6 @@ function weightedRandom(weights) {
   }
   return weights.length - 1;
 }
-
 // --- Outcome Function ---
 async function outCome(outcome, enemy) {
   let id;
@@ -247,22 +245,38 @@ async function outCome(outcome, enemy) {
 
 // --- Enemies ---
 const enimies = {
-  3: async function () { await runEnemy("Boss"); },
-  2: async function () { await runEnemy("Mini Boss"); },
-  1: async function () { await runEnemy("Wanderer"); },
-  0: async function () { await runEnemy("Goblin"); }
-};
+  async fight(enemyName, weights) {
+    await queueID();
+    await outCome(null, enemyName);
+    const pick = pickChoice();
+    const playerChoices = findChoices(); // returns something like ["r","p","s"]
+    // weighted random — AI sometimes picks 1st, 2nd, or 3rd most common move
+    const index = weightedRandom([60, 30, 10]); // 60% top, 30% second, 10% third
+    const playerFav = playerChoices[index];
+    // AI picks the counter
+    const counter = { r: "p", p: "s", s: "r" };
+    const aiPick = counter[playerFav];
+    const pChoice = await pick.pChoice();
+    const outcome = compare(pChoice, aiPick);
+    await outCome(outcome, enemyName);
+  },
 
-async function runEnemy(name) {
-  await queueID();
-  await outCome(null, name);
-  const pick = pickChoice();
-  const rChoiceArr = pick.rChoice();
-  const choice = rChoiceArr[weightedRandom(rChoiceArr.map(() => 1))]; // simple equal weights
-  const pChoice = await pick.pChoice();
-  const outcome = compare(pChoice, choice);
-  await outCome(outcome, name);
-}
+  3: async function() { // Boss
+    await this.fight("Boss", [60, 30, 10]);
+  },
+
+  2: async function() { // Mini Boss
+    await this.fight("Mini Boss", [55, 30, 15]);
+  },
+
+  1: async function() { // Wanderer
+    await this.fight("Wanderer", [50, 35, 15]);
+  },
+
+  0: async function() { // Goblin
+    await this.fight("Goblin", [40, 40, 20]); // dumber
+  },
+};
 
 // --- New Room ---
 async function newRoom() {
@@ -283,7 +297,11 @@ async function newRoom() {
     await enimies[enemyID]();
   }
 
-  setTimeout(newRoom, 500);
+  if (hp.get > 0) {
+    setTimeout(newRoom, 500);
+  } else {
+    return;
+  }
 }
 
 newRoom();

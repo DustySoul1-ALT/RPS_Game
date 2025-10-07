@@ -1,11 +1,3 @@
-body {
-  display: flex;
-  flex-direction: column; /* optional, but usually helps */
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  min-height: 100vh; /* vertically center */
-}
 .ubuntu-regular {
   font-family: "Ubuntu", sans-serif;
   font-weight: 400;
