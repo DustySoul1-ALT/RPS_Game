@@ -300,25 +300,59 @@ async function outCome(outcome, enemy) {
     default: id = -1;
   }
 
+  const enemyObj = getEnemy(enemy); // 👈 grab or reuse current enemy
+
   if (outcome === true) {
     if (hp.get() < hp.getMax()) hp.set(hp.get() + 1);
-    await writer(`You won against a ${enemy}! Current HP: ${hp.get()}/${hp.getMax()}`);
-  }
-  else if (outcome === false) {
+    updateEnemyHP(enemy, true); // 👈 enemy HP--
+    await writer(`You won against a ${enemy}! Enemy HP: ${enemyObj.hp}/${enemyHPData[enemy]} | Your HP: ${hp.get()}/${hp.getMax()}`);
+
+    if (enemyObj.hp <= 0) {
+      await writer(`${enemy} defeated!`);
+      currentEnemy = null; // 👈 reset for next room
+    }
+
+  } else if (outcome === false) {
     hp.set(hp.get() - 1);
+    updateEnemyHP(enemy, false); // 👈 enemy HP++
     if (hp.get() <= 0) {
       await writer(`You died against a ${enemy}. Game Over!`);
       Room.set(0);
     } else {
-      await writer(`You lost against a ${enemy}. Current HP: ${hp.get()}/${hp.getMax()}`);
+      await writer(`You lost against a ${enemy}. Enemy HP: ${enemyObj.hp}/${enemyHPData[enemy]} | Your HP: ${hp.get()}/${hp.getMax()}`);
     }
+
+  } else if (outcome === "tie") {
+    await writer(`It's a tie! Enemy HP: ${enemyObj.hp}/${enemyHPData[enemy]} | Your HP: ${hp.get()}/${hp.getMax()}`);
+  } else if (outcome === null) {
+    await writer(`A ${enemy} challenges you. Enemy HP: ${enemyObj.hp}/${enemyHPData[enemy]} | Your HP: ${hp.get()}/${hp.getMax()}`);
   }
-  else if (outcome === "tie") {
-    await writer(`It's a tie! Current HP: ${hp.get()}/${hp.getMax()}`);
+}
+
+// --- Enemy HP System ---
+const enemyHPData = {
+  Boss: 5,
+  "Mini Boss": 3,
+  Wanderer: 2,
+  Goblin: 1
+};
+let currentEnemy = null;
+function getEnemy(enemyName) {
+  if (!currentEnemy || currentEnemy.name !== enemyName) {
+    currentEnemy = {
+      name: enemyName,
+      hp: enemyHPData[enemyName]
+    };
   }
-  else if (outcome === null) {
-    await writer(`A ${enemy} challenges you. Current HP: ${hp.get()}/${hp.getMax()}`);
-  }
+  return currentEnemy;
+}
+
+function updateEnemyHP(enemyName, outcome) {
+  const enemy = getEnemy(enemyName);
+  if (outcome === true) enemy.hp--;       // player won → enemy loses HP
+  else if (outcome === false) enemy.hp++; // player lost → enemy gains HP
+  // tie = do nothing
+  return enemy.hp;
 }
 
 // --- Enemies ---
@@ -335,8 +369,13 @@ const enimies = {
     const aiPick = counter[playerFav];
     const pChoice = await pick.pChoice();
     const outcome = compare(pChoice, aiPick);
-    console.log("Outcome: " + outcome)
+    // console.log("Outcome: " + outcome)
     await outCome(outcome, enemyName);
+  // 👇 Repeat same enemy if player lost or tied
+    const enemyObj = getEnemy(enemyName);
+    if ((outcome === false || outcome === "tie") && enemyObj.hp > 0 && hp.get() > 0) {
+      await this.fight(enemyName, weights);
+    }
   },
 
   3: async function() { // Boss
