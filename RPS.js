@@ -285,22 +285,23 @@ async function newRoom() {
   const enemyChance = [
     Math.min(Room.get() * 6, 75), // Goblin
     Math.min(Room.get() * 5, 70), // Wanderer
-    Math.min(Room.get() * 4, 60)  // Mini Boss
+    Math.min(Room.get() * 4, 60), // Mini Boss
+    Math.min(Room.get() * 2, 40)  // Boss
   ];
+  const enemyTypes = [0, 1, 2, 3];
 
   const enemyNum = generateRanNum(1, Math.min(Room.get(), 10));
-  const enemyTypes = [0, 1, 2];
 
   for (let i = 0; i < enemyNum; i++) {
+    if (hp.get() <= 0) break;
     const pickIndex = weightedRandom(enemyChance);
     const enemyID = enemyTypes[pickIndex];
     await enimies[enemyID]();
   }
 
-  if (hp.get > 0) {
-    setTimeout(newRoom, 500);
-  } else {
-    return;
+  if (hp.get() > 0) {
+    await new Promise(res => setTimeout(res, 500));
+    await newRoom();
   }
 }
 
