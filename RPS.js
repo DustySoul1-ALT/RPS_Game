@@ -81,7 +81,7 @@ const stRoomChars = ["s", "e", "c"];
 
 // --- Utility Functions ---
 function generateRanNum(min, max) {
-  const rand = crypto.getRandomValues(new Uint32Array(1))[0] / 2**32;
+  const rand = crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
   return Math.floor(rand * (max - min + 1)) + min;
 }
 
@@ -102,7 +102,7 @@ async function keyPress(validInputs) {
 async function queueID() {
   return new Promise(resolve => {
     let id = generateRanNum(0, 100);
-    while(queue.add(id) === false) {
+    while (queue.add(id) === false) {
       id = generateRanNum(0, 100);
     }
 
@@ -216,68 +216,68 @@ function weightedRandom(weights) {
 // --- Outcome Function ---
 async function outCome(outcome, enemy) {
   let id;
-  switch(enemy){
-    case "Goblin": id=0; break;
-    case "Wanderer": id=1; break;
-    case "Mini Boss": id=2; break;
-    case "Boss": id=3; break;
-    default: id=-1;
+  switch (enemy) {
+    case "Goblin": id = 0; break;
+    case "Wanderer": id = 1; break;
+    case "Mini Boss": id = 2; break;
+    case "Boss": id = 3; break;
+    default: id = -1;
   }
 
-  if(outcome === true){
-    if(hp.get() < hp.getMax()) hp.set(hp.get() + 1);
+  if (outcome === true) {
+    if (hp.get() < hp.getMax()) hp.set(hp.get() + 1);
     await writer(`You won against a ${enemy}! Current HP: ${hp.get()}/${hp.getMax()}`);
   }
-  else if(outcome === false){
+  else if (outcome === false) {
     hp.set(hp.get() - 1);
-    if(hp.get() <= 0){
+    if (hp.get() <= 0) {
       await writer(`You died against a ${enemy}. Game Over!`);
       Room.set(0);
     } else {
       await writer(`You lost against a ${enemy}. Current HP: ${hp.get()}/${hp.getMax()}`);
     }
   }
-  else if(outcome === "tie"){
+  else if (outcome === "tie") {
     await writer(`It's a tie! Current HP: ${hp.get()}/${hp.getMax()}`);
   }
-  else if(outcome === null){
+  else if (outcome === null) {
     await writer(`A ${enemy} challenges you. Current HP: ${hp.get()}/${hp.getMax()}`);
   }
 }
 
 // --- Enemies ---
 const enimies = {
-  3: async function() { await runEnemy("Boss"); },
-  2: async function() { await runEnemy("Mini Boss"); },
-  1: async function() { await runEnemy("Wanderer"); },
-  0: async function() { await runEnemy("Goblin"); }
+  3: async function () { await runEnemy("Boss"); },
+  2: async function () { await runEnemy("Mini Boss"); },
+  1: async function () { await runEnemy("Wanderer"); },
+  0: async function () { await runEnemy("Goblin"); }
 };
 
-async function runEnemy(name){
+async function runEnemy(name) {
   await queueID();
   await outCome(null, name);
   const pick = pickChoice();
   const rChoiceArr = pick.rChoice();
-  const choice = rChoiceArr[weightedRandom(rChoiceArr.map(()=>1))]; // simple equal weights
+  const choice = rChoiceArr[weightedRandom(rChoiceArr.map(() => 1))]; // simple equal weights
   const pChoice = await pick.pChoice();
   const outcome = compare(pChoice, choice);
   await outCome(outcome, name);
 }
 
 // --- New Room ---
-async function newRoom(){
-  if(Room.get()===0) Room.set(1);
+async function newRoom() {
+  if (Room.get() === 0) Room.set(1);
 
   const enemyChance = [
-    Math.min(Room.get()*6,75), // Goblin
-    Math.min(Room.get()*5,70), // Wanderer
-    Math.min(Room.get()*4,60)  // Mini Boss
+    Math.min(Room.get() * 6, 75), // Goblin
+    Math.min(Room.get() * 5, 70), // Wanderer
+    Math.min(Room.get() * 4, 60)  // Mini Boss
   ];
 
-  const enemyNum = generateRanNum(1, Math.min(Room.get(),10));
-  const enemyTypes = [0,1,2];
+  const enemyNum = generateRanNum(1, Math.min(Room.get(), 10));
+  const enemyTypes = [0, 1, 2];
 
-  for(let i=0;i<enemyNum;i++){
+  for (let i = 0; i < enemyNum; i++) {
     const pickIndex = weightedRandom(enemyChance);
     const enemyID = enemyTypes[pickIndex];
     await enimies[enemyID]();
