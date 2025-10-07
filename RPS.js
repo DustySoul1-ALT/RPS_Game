@@ -338,20 +338,28 @@ const enemyHPData = {
 };
 let currentEnemy = null;
 function getEnemy(enemyName) {
+  // If it's a different enemy or no current enemy, create a new one
   if (!currentEnemy || currentEnemy.name !== enemyName) {
     currentEnemy = {
       name: enemyName,
-      hp: enemyHPData[enemyName]
+      hp: enemyHPData[enemyName],       // start at max HP
+      maxHP: enemyHPData[enemyName],    // store max for clamping
     };
   }
   return currentEnemy;
 }
-
 function updateEnemyHP(enemyName, outcome) {
   const enemy = getEnemy(enemyName);
-  if (outcome === true) enemy.hp--;       // player won → enemy loses HP
-  else if (outcome === false) enemy.hp++; // player lost → enemy gains HP
+
+  if (outcome === true) {
+    // Player won → enemy loses 1 HP, cannot go below 0
+    enemy.hp = Math.max(enemy.hp - 1, 0);
+  } else if (outcome === false) {
+    // Player lost → enemy gains 1 HP, cannot go above max
+    enemy.hp = Math.min(enemy.hp + 1, enemy.maxHP);
+  }
   // tie = do nothing
+
   return enemy.hp;
 }
 
