@@ -46,16 +46,17 @@ const queue = (() => {
   const queue = [];
   return Object.freeze({
     add: (val) => {
-      if (queue.find(val)) {
-        return false;
+      if (queue.find(x => x === val)) {
+        return false; // already in queue
       } else {
-        queue.push(val)
+        queue.push(val);
+        return queue.length - 1; // return position
       }
     },
-    get: () => [...queue], // return a copy, not the actual array
+    get: () => [...queue], // return a copy
     remove: (id) => {
-      const index = db.indexOf(id);
-      if (index !== -1) db.splice(index, 1);
+      const index = queue.indexOf(id);
+      if (index !== -1) queue.splice(index, 1);
     },
     clear: () => queue.length = 0,
   });
