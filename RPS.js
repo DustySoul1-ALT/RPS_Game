@@ -289,45 +289,6 @@ function weightedRandom(weights) {
   }
   return weights.length - 1;
 }
-// --- Outcome Function ---
-async function outCome(outcome, enemy) {
-  let id;
-  switch (enemy) {
-    case "Goblin": id = 0; break;
-    case "Wanderer": id = 1; break;
-    case "Mini Boss": id = 2; break;
-    case "Boss": id = 3; break;
-    default: id = -1;
-  }
-
-  const enemyObj = getEnemy(enemy); // 👈 grab or reuse current enemy
-
-  if (outcome === true) {
-    if (hp.get() < hp.getMax()) hp.set(hp.get() + 1);
-    updateEnemyHP(enemy, true); // 👈 enemy HP--
-    await writer(`You won against a ${enemy}! Enemy HP: ${enemyObj.hp}/${enemyHPData[enemy]} | Your HP: ${hp.get()}/${hp.getMax()}`);
-
-    if (enemyObj.hp <= 0) {
-      await writer(`${enemy} defeated!`);
-      currentEnemy = null; // 👈 reset for next room
-    }
-
-  } else if (outcome === false) {
-    hp.set(hp.get() - 1);
-    updateEnemyHP(enemy, false); // 👈 enemy HP++
-    if (hp.get() <= 0) {
-      await writer(`You died against a ${enemy}. Game Over!`);
-      Room.set(0);
-    } else {
-      await writer(`You lost against a ${enemy}. Enemy HP: ${enemyObj.hp}/${enemyHPData[enemy]} | Your HP: ${hp.get()}/${hp.getMax()}`);
-    }
-
-  } else if (outcome === "tie") {
-    await writer(`It's a tie! Enemy HP: ${enemyObj.hp}/${enemyHPData[enemy]} | Your HP: ${hp.get()}/${hp.getMax()}`);
-  } else if (outcome === null) {
-    await writer(`A ${enemy} challenges you. Enemy HP: ${enemyObj.hp}/${enemyHPData[enemy]} | Your HP: ${hp.get()}/${hp.getMax()}`);
-  }
-}
 
 // --- Enemy HP System ---
 const enemyHPData = {
@@ -338,16 +299,17 @@ const enemyHPData = {
 };
 let currentEnemy = null;
 function getEnemy(enemyName) {
-  // If it's a different enemy or no current enemy, create a new one
+  // Only create a new enemy if none exists or enemy type changed
   if (!currentEnemy || currentEnemy.name !== enemyName) {
     currentEnemy = {
       name: enemyName,
-      hp: enemyHPData[enemyName],       // start at max HP
-      maxHP: enemyHPData[enemyName],    // store max for clamping
+      hp: enemyHPData[enemyName],   // start at max
+      maxHP: enemyHPData[enemyName] // store max for clamping
     };
   }
   return currentEnemy;
 }
+
 function updateEnemyHP(enemyName, outcome) {
   const enemy = getEnemy(enemyName);
 
@@ -359,50 +321,68 @@ function updateEnemyHP(enemyName, outcome) {
     enemy.hp = Math.min(enemy.hp + 1, enemy.maxHP);
   }
   // tie = do nothing
-
   return enemy.hp;
 }
+// --- Outcome Function ---
+async function outCome(outcome, enemy) {
+  const enemyObj = getEnemy(enemy);
 
+  if (outcome === true) {
+    if (hp.get() < hp.getMax()) hp.set(hp.get() + 1);
+    updateEnemyHP(enemy, true);
+    await writer(`You won against a ${enemy}! Enemy HP: ${enemyObj.hp}/${enemyObj.maxHP} | Your HP: ${hp.get()}/${hp.getMax()}`);
+
+    if (enemyObj.hp <= 0) {
+      await writer(`${enemy} defeated!`);
+      currentEnemy = null; // reset for next enemy
+    }
+
+  } else if (outcome === false) {
+    hp.set(hp.get() - 1);
+    updateEnemyHP(enemy, false);
+
+    if (hp.get() <= 0) {
+      await writer(`You died against a ${enemy}. Game Over!`);
+      Room.set(0);
+    } else {
+      await writer(`You lost against a ${enemy}. Enemy HP: ${enemyObj.hp}/${enemyObj.maxHP} | Your HP: ${hp.get()}/${hp.getMax()}`);
+    }
+
+  } else if (outcome === "tie") {
+    await writer(`It's a tie! Enemy HP: ${enemyObj.hp}/${enemyObj.maxHP} | Your HP: ${hp.get()}/${hp.getMax()}`);
+  } else if (outcome === null) {
+    await writer(`A ${enemy} challenges you. Enemy HP: ${enemyObj.hp}/${enemyObj.maxHP} | Your HP: ${hp.get()}/${hp.getMax()}`);
+  }
+}
 // --- Enemies ---
 const enimies = {
   async fight(enemyName, weights) {
     await queueID();
     await outCome(null, enemyName);
+
     const pick = pickChoice();
-    const playerChoices = findChoices(); // returns something like ["r","p","s"]
-    // weighted random — AI sometimes picks 1st, 2nd, or 3rd most common move
+    const playerChoices = findChoices(); // ["r","p","s"]
     const index = weightedRandom(weights);
     const playerFav = playerChoices[index];
     const counter = { r: "p", p: "s", s: "r" };
     const aiPick = counter[playerFav];
     const pChoice = await pick.pChoice();
+
     const outcome = compare(pChoice, aiPick);
-    // console.log("Outcome: " + outcome)
     await outCome(outcome, enemyName);
-  // 👇 Repeat same enemy if player lost or tied
+
+    // Repeat same enemy if player lost or tied and enemy still alive
     const enemyObj = getEnemy(enemyName);
     if ((outcome === false || outcome === "tie") && enemyObj.hp > 0 && hp.get() > 0) {
       await this.fight(enemyName, weights);
     }
   },
 
-  3: async function() { // Boss
-    await this.fight("Boss", [60, 30, 10]);
-  },
-
-  2: async function() { // Mini Boss
-    await this.fight("Mini Boss", [55, 30, 15]);
-  },
-
-  1: async function() { // Wanderer
-    await this.fight("Wanderer", [50, 35, 15]);
-  },
-
-  0: async function() { // Goblin
-    await this.fight("Goblin", [40, 40, 20]); // dumber
-  },
+  3: async function() { await this.fight("Boss", [60, 30, 10]); },
+  2: async function() { await this.fight("Mini Boss", [55, 30, 15]); },
+  1: async function() { await this.fight("Wanderer", [50, 35, 15]); },
+  0: async function() { await this.fight("Goblin", [40, 40, 20]); }
 };
-
 // --- New Room ---
 async function newRoom() {
   if (Room.get() === 0) Room.set(1);
