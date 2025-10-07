@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { supabase } from "./supabase.js";
 
 // Fate of Fists made by Mukilan M.
 // Inspired by A Dark Room by DoubleSpeak Games and Hades by Supergiant games
