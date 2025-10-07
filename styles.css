@@ -1,7 +1,7 @@
 body {
   text-align: center;
+  align-items: center;
 }
-
 .ubuntu-regular {
   font-family: "Ubuntu", sans-serif;
   font-weight: 400;

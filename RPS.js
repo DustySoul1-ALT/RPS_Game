@@ -4,12 +4,17 @@
 // Game Vars with Closures
 const Room = (() => {
   let roomNum = 0; // private
+  const roomInd = document.getElementById("room")
   const api = {
     get: () => roomNum,
-    set: (val) => { if (typeof val === 'number') roomNum = val; }
+    set: (val) => {
+      if (typeof val === 'number') roomNum = val;
+      roomInd.textContent = "Room:" + roomNum;
+    }
   }
   return Object.freeze(api);
 })();
+Room.set(0);
 const Profiles = (() => {
   const profiles = []; // private
   const api = {
@@ -36,13 +41,25 @@ const hp = (() => {
   };
   return Object.freeze(api);
 })();
-const gameState = (() => {
-  let state = null;
+hp.set(5);
+const queue = (() => {
+  const queue = [];
   return Object.freeze({
-    get: () => state,
-    set: (val) => { state = val; }
+    add: (val) => {
+      if (queue.find(val)) {
+        return false;
+      } else {
+        queue.push(val)
+      }
+    },
+    get: () => [...queue], // return a copy, not the actual array
+    remove: (id) => {
+      const index = db.indexOf(id);
+      if (index !== -1) db.splice(index, 1);
+    },
+    clear: () => queue.length = 0,
   });
-})
+})();
 // Database
 const GameDB = (() => {
   const db = [];
@@ -139,6 +156,28 @@ async function keyPress(validInputs) {
       }
     }
     document.addEventListener("keydown", handler);
+  });
+}
+async function queueID() {
+  return new Promise(resolve => {
+    let id = generateRanNum(0, 100);
+    let pos = queue.add(id);
+
+    if (pos === false) {
+      id = generateRanNum(0, 100);
+      pos = queue.add(id);
+    }
+
+    function checkQueue() {
+      const queueDB = queue.get();
+      if (queueDB[0] === id) {
+        resolve(id); // success
+      } else {
+        setTimeout(checkQueue, 50); // check again later, don’t block
+      }
+    }
+
+    checkQueue();
   });
 }
 function writer(text, speed = 60) {
@@ -289,6 +328,7 @@ async function outCome(outcome, enemy) {
 const enimies = {
   // Boss
   3: async function() {
+    await queueID();
     await outCome(null, "Boss");
     const pick = pickChoice();
     const choice = pick.rChoice()[weightedRandom([33, 33, 33])];
@@ -298,6 +338,7 @@ const enimies = {
   },
   // Mini Boss
   2: async function() {
+    await queueID();
     await outCome(null, "Mini Boss");
     const pick = pickChoice();
     const choice = pick.rChoice()[weightedRandom([34, 34, 32])];
@@ -307,6 +348,7 @@ const enimies = {
   },
   // Wanderer
   1: async function() {
+    await queueID();
     await outCome(null, "Wanderer");
     const pick = pickChoice();
     const choice = pick.rChoice()[weightedRandom([32, 35, 33])];
@@ -316,6 +358,7 @@ const enimies = {
   },
   // Goblin
   0: async function() {
+    await queueID();
     await outCome(null, "Goblin");
     const pick = pickChoice();
     const choice = pick.rChoice()[weightedRandom([32, 33, 35])];
