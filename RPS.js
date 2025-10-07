@@ -1,3 +1,5 @@
+import { supabase } from "./supabase";
+
 // Fate of Fists made by Mukilan M.
 // Inspired by A Dark Room by DoubleSpeak Games and Hades by Supergiant games
 // --- Game Vars with Closures ---
@@ -15,12 +17,46 @@ const Room = (() => {
 })();
 Room.set(0);
 const Profiles = (() => {
-  const profiles = [];
   const api = {
-    get: () => profiles,
-    set: (val) => { if (typeof val === 'object') profiles.push(val); },
-  };
-  return Object.freeze(api);
+    get: async (id = null) => {
+      if (id) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', id) // id can be a string now
+          .maybeSingle()
+        if (error) throw error
+        return data || null
+      } else {
+        const { data, error } = await supabase.from('profiles').select('*')
+        if (error) throw error
+        return data
+      }
+    },
+    // Add (insert) a profile
+    set: async (val) => {
+      if (typeof val === 'object') {
+        const { data, error } = await supabase
+          .from('profiles')
+          .insert([val])
+          .select()
+        if (error) throw error
+        return data
+      }
+    },
+
+    // Update an existing profile
+    update: async (id, updates) => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', id)
+        .select()
+      if (error) throw error
+      return data
+    },
+  }
+  return Object.freeze(api)
 })();
 const hp = (() => {
   let hpVal = 5;
@@ -75,6 +111,12 @@ const ynChars = ["y", "n"];
 const menuChars = ["s", "p", "c"];
 const stRoomChars = ["s", "e", "c"];
 
+// --- New types ---
+let save;
+let load;
+Object.freeze(save)
+Object.freeze(load)
+
 // --- Utility Functions ---
 function generateRanNum(min, max) {
   const rand = crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
@@ -93,7 +135,25 @@ async function keyPress(validInputs) {
     document.addEventListener("keydown", handler);
   });
 }
-
+// --- Save and Load Data ---
+async function data(saveORLoad, profile) {
+  if (saveORLoad === save) {
+    if (Profiles.get(profile) === null) {
+      writer("Cannot find profile, creating one...", 120)
+      Profiles.set({
+        id: profile,
+        stuff: [GameDB.get()],
+      });
+    } else {
+      return Profiles.get(profile);
+    }
+  } else if (saveORLoad === load) {
+    Profiles.set({
+        id: profile,
+        stuff: [GameDB.get()],
+      });
+  }
+}
 // --- QueueID Function ---
 async function queueID() {
   return new Promise(resolve => {
@@ -117,7 +177,7 @@ async function queueID() {
 }
 
 // --- Writer Function ---
-function writer(text, speed = 60) {
+function writer(text, speed = 120) {
   return new Promise(resolve => {
     const el = document.getElementById("writer");
     if (!el) return resolve();
@@ -127,15 +187,36 @@ function writer(text, speed = 60) {
       if (i < text.length) {
         el.textContent += text.charAt(i);
         i++;
-        setTimeout(type, speed * 2);
+        setTimeout(type, speed);
       } else resolve();
     }
     type();
   });
 }
 
+// --- Sign-Up and Sign-In Function ---
+async function signIP(email) {
+  const { data, error } = await supabase.auth.signInWithOtp({
+  email: email,
+  options: {
+    // set this to false if you do not want the user to be automatically signed up
+    shouldCreateUser: true,
+  },
+  });
+  signIPConfirm(email, prompt("What is the token"))
+}
+async function signIPConfirm(email, token) {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.verifyOtp({
+      email: email,
+      token: token,
+      type: 'email',
+    })
+}
 // --- Choices Function ---
-function choices(text, speed = 60) {
+function choices(text, speed = 120) {
   return new Promise(resolve => {
     const el = document.getElementById("choices");
     if (!el) return resolve();
@@ -248,13 +329,13 @@ const enimies = {
     const pick = pickChoice();
     const playerChoices = findChoices(); // returns something like ["r","p","s"]
     // weighted random — AI sometimes picks 1st, 2nd, or 3rd most common move
-    const index = weightedRandom([60, 30, 10]); // 60% top, 30% second, 10% third
+    const index = weightedRandom(weights);
     const playerFav = playerChoices[index];
-    // AI picks the counter
     const counter = { r: "p", p: "s", s: "r" };
     const aiPick = counter[playerFav];
     const pChoice = await pick.pChoice();
     const outcome = compare(pChoice, aiPick);
+    console.log("Outcome: " + outcome)
     await outCome(outcome, enemyName);
   },
 
