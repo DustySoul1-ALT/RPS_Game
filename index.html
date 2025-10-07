@@ -23,12 +23,20 @@
         <style>
             body {
               display: flex;
-              flex-direction: column; /* optional, but usually helps */
-              justify-content: center;
+              flex-direction: column; /* keep content stacked */
+              justify-content: flex-start; /* align items from the top */
               align-items: center;
               text-align: center;
-              min-height: 100vh; /* vertically center */
+              min-height: 100vh; /* full viewport height */
+              font-size: 24px; /* bigger font for everything */
+              padding-top: 20px; /* optional padding from top */
+            }   
+            h1 {
+              margin: 0;
+              padding: 10px 0;
+              font-size: 48px; /* bigger heading */
             }
+
         </style>
         <h1>Test</h1>
         <hr>

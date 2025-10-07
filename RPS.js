@@ -8,13 +8,12 @@ const Room = (() => {
     get: () => roomNum,
     set: (val) => {
       if (typeof val === 'number') roomNum = val;
-      roomInd.textContent = "Room:" + roomNum;
+      roomInd.textContent = "Room: " + roomNum;
     }
   };
   return Object.freeze(api);
 })();
 Room.set(0);
-
 const Profiles = (() => {
   const profiles = [];
   const api = {
@@ -23,7 +22,6 @@ const Profiles = (() => {
   };
   return Object.freeze(api);
 })();
-
 const hp = (() => {
   let hpVal = 5;
   let maxHP = 5;
@@ -43,7 +41,6 @@ const hp = (() => {
   return Object.freeze(api);
 })();
 hp.set(5);
-
 // --- Queue ---
 const queue = (() => {
   const queue = [];
@@ -130,7 +127,7 @@ function writer(text, speed = 60) {
       if (i < text.length) {
         el.textContent += text.charAt(i);
         i++;
-        setTimeout(type, speed);
+        setTimeout(type, speed * 2);
       } else resolve();
     }
     type();
@@ -301,6 +298,7 @@ async function newRoom() {
 
   if (hp.get() > 0) {
     await new Promise(res => setTimeout(res, 500));
+    Room.set(Room.get() + 1);
     await newRoom();
   }
 }
