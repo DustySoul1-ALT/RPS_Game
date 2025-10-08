@@ -325,6 +325,7 @@ const enimies = {
   async fight(enemyName, weights, ehp, mhp) {
     await queueID();
     await outCome(null, enemyName);
+
     const pick = pickChoice();
     const playerChoices = findChoices(); // returns something like ["r","p","s"]
     const index = weightedRandom(weights);
@@ -333,31 +334,42 @@ const enimies = {
     const aiPick = counter[playerFav];
     const pChoice = await pick.pChoice();
     const outcome = compare(pChoice, aiPick);
+
     await outCome(outcome, enemyName);
-    if (outcome === true && ehp - 1 > 0) {
-      let eHP = ehp - 1;
-      this.fight(enemyName, weights, eHP, mhp)
+
+    // Update enemy HP based on outcome
+    if (outcome === true) {
+      ehp = Math.max(ehp - 1, 0);
+      if (ehp === 0) {
+        await writer(`You defeated the ${enemyName}!`, 120);
+        return; // stop recursion, enemy is dead
+      }
     }
-    if (outcome === true && ehp - 1 === 0) {
-      await writer(`You won against a ${enemyName}!`, 120)
+
+    if (outcome === false) {
+      ehp = Math.min(ehp + 1, mhp); // enemy regains HP if player lost
     }
-    if ((outcome === false || outcome === "tie" || ehp > 0) && hp.get() > 0) {
+
+    // Repeat fight if enemy is still alive AND player is alive AND tie/loss
+    if ((outcome === false || outcome === "tie") && ehp > 0 && hp.get() > 0) {
       await this.fight(enemyName, weights, ehp, mhp);
     }
   },
+
   3: async function() { // Boss
     await this.fight("Boss", [60, 30, 10], 5, 5);
   },
   2: async function() { // Mini Boss
-    await this.fight("Mini Boss", [55, 30, 15], 4, 4);
+    await this.fight("Mini Boss", [55, 30, 15], 3, 3);
   },
   1: async function() { // Wanderer
     await this.fight("Wanderer", [50, 35, 15], 2, 2);
   },
   0: async function() { // Goblin
-    await this.fight("Goblin", [40, 40, 20], 1, 1); // dumber
+    await this.fight("Goblin", [40, 40, 20], 1, 1);
   },
 };
+
 
 // --- New Room ---
 async function newRoom() {
