@@ -94,7 +94,6 @@ const queue = (() => {
     clear: () => queue.length = 0,
   });
 })();
-
 // --- Game DB ---
 const GameDB = (() => {
   const db = [];
@@ -104,19 +103,16 @@ const GameDB = (() => {
     clear: () => db.length = 0,
   });
 })();
-
 // --- Allowed Chars ---
 const choiceChars = ["r", "p", "s"];
 const ynChars = ["y", "n"];
 const menuChars = ["s", "p", "c"];
 const stRoomChars = ["s", "e", "c"];
-
 // --- New types ---
 let save;
 let load;
 Object.freeze(save)
 Object.freeze(load)
-
 // --- Utility Functions ---
 function generateRanNum(min, max) {
   const rand = crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
@@ -175,7 +171,6 @@ async function queueID() {
     checkQueue();
   });
 }
-
 // --- Writer Function ---
 function writer(text, speed = 120) {
   return new Promise(resolve => {
@@ -194,7 +189,6 @@ function writer(text, speed = 120) {
     type();
   });
 }
-
 // --- Sign-Up and Sign-In Function ---
 async function signIP(email) {
   const { data, error } = await supabase.auth.signInWithOtp({
@@ -233,7 +227,6 @@ function choices(text, speed = 120) {
     type();
   });
 }
-
 // --- RPS Logic ---
 function findChoices() {
   let counts = { r: 0, p: 0, s: 0 };
@@ -258,7 +251,6 @@ function findChoices() {
 
   return top3;
 }
-
 function pickChoice() {
   choices("Press one of the following keys: R for rock, P for paper, S for scissors");
   const pChoice = keyPress(choiceChars);
@@ -267,7 +259,6 @@ function pickChoice() {
     pChoice: () => pChoice
   };
 }
-
 function compare(pc, bc) {
   if (pc === bc) return "tie";
   if (pc === null) return false;
@@ -279,7 +270,6 @@ function compare(pc, bc) {
   };
   return outcomes[pc][bc];
 }
-
 function weightedRandom(weights) {
   const total = weights.reduce((a, b) => a + b, 0);
   let rand = Math.random() * total;
@@ -290,7 +280,6 @@ function weightedRandom(weights) {
   }
   return weights.length - 1;
 }
-
 // --- Outcome Function ---
 async function outCome(outcome, enemy, ehp, mhp) {
   let id;
@@ -313,18 +302,18 @@ async function outCome(outcome, enemy, ehp, mhp) {
     } else {
       await writer(`You lost against a ${enemy}. Your HP: ${hp.get()}/${hp.getMax()}`);
     }
-
+    await writer(`You lost against a ${enemy} Enemy HP: ${ehp}/${mhp}`);
   } else if (outcome === "tie") {
     await writer(`It's a tie! Enemy HP: ${ehp}/${mhp}`);
   } else if (outcome === null) {
-    await writer(`A ${enemy} challenges you. Your HP: ${hp.get()}/${hp.getMax()}`);
+    await writer(`A ${enemy} challenges you. Enemy HP: ${ehp}/${mhp}`);
   }
 }
 // --- Enemies ---
 const enimies = {
   async fight(enemyName, weights, ehp, mhp) {
     await queueID();
-    await outCome(null, enemyName);
+    await outCome(null, enemyName, ehp, mhp);
 
     const pick = pickChoice();
     const playerChoices = findChoices(); // returns something like ["r","p","s"]
@@ -335,7 +324,7 @@ const enimies = {
     const pChoice = await pick.pChoice();
     const outcome = compare(pChoice, aiPick);
 
-    await outCome(outcome, enemyName);
+    await outCome(outcome, enemyName, ehp, mhp);
 
     // Update enemy HP based on outcome
     if (outcome === true) {
@@ -345,11 +334,9 @@ const enimies = {
         return; // stop recursion, enemy is dead
       }
     }
-
     if (outcome === false) {
       ehp = Math.min(ehp + 1, mhp); // enemy regains HP if player lost
     }
-
     // Repeat fight if enemy is still alive AND player is alive AND tie/loss
     if ((outcome === false || outcome === "tie") && ehp > 0 && hp.get() > 0) {
       await this.fight(enemyName, weights, ehp, mhp);
@@ -369,12 +356,9 @@ const enimies = {
     await this.fight("Goblin", [40, 40, 20], 1, 1);
   },
 };
-
-
 // --- New Room ---
 async function newRoom() {
   if (Room.get() === 0) Room.set(1);
-
   const enemyChance = [
     Math.min(Room.get() * 6, 75), // Goblin
     Math.min(Room.get() * 5, 70), // Wanderer
@@ -382,16 +366,13 @@ async function newRoom() {
     Math.min(Room.get() * 2, 40)  // Boss
   ];
   const enemyTypes = [0, 1, 2, 3];
-
   const enemyNum = generateRanNum(1, Math.min(Room.get(), 10));
-
   for (let i = 0; i < enemyNum; i++) {
     if (hp.get() <= 0) break;
     const pickIndex = weightedRandom(enemyChance);
     const enemyID = enemyTypes[pickIndex];
     await enimies[enemyID]();
   }
-
   if (hp.get() > 0) {
     await new Promise(res => setTimeout(res, 500));
     Room.set(Room.get() + 1);
