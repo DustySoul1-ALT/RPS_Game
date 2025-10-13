@@ -1,4 +1,4 @@
-import { showToast, choiceBG, oldPaper, draw } from "./stuff";
+import { showToast, choiceBG, oldPaper, draw } from "./stuff.js";
 
 // Fate of Fists made by Mukilan M.
 // Inspired by A Dark Room by DoubleSpeak Games and Hades by Supergiant games
