@@ -1,51 +1,56 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="A rogue-like RPS game">
-        <meta name="author" content="Mukilan Madhusudhanan">
-        <!--  
-		Fate of Fists
-		==================
-		
-		A rouge-like text adventure by Mukilan M.
-		Inspired by A Dark Room (https://github.com/doublespeakgames/adarkroom/)
-	    -->
-        <title>Fate of Fists</title>
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Ubuntu&display=swap');
-        </style>
-        <script type="module" src="./RPS.js" defer></script>
-        <link href="./styles.css" type="stylesheet">
-    </head>
-    <body>
-        <style>
-            body {
-              display: flex;
-              flex-direction: column; /* keep content stacked */
-              justify-content: flex-start; /* align items from the top */
-              align-items: center;
-              text-align: center;
-              min-height: 100vh; /* full viewport height */
-              font-size: 24px; /* bigger font for everything */
-              padding-top: 20px; /* optional padding from top */
-            }   
-            h1 {
-              margin: 0;
-              padding: 10px 0;
-              font-size: 48px; /* bigger heading */
-            }
-
-        </style>
-        <h1>Test</h1>
-        <hr>
-        <h3 id="writer"></h3>
-        <hr>
-        <div id="game">
-            <h3 id="choices">Choose:</h3>
-            <h4 id="hp">HP:</h4>
-            <h4 id="room">Room: </h4>
-        </div>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A roguelite RPS game">
+    <meta name="author" content="Mukilan Madhusudhanan">
+    <title>Fate of Fists</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script type="module" src="./RPS.js" defer></script>
+    <link href="./styles.css" type="stylesheet">
+</head>
+<body>
+    <style>
+        body {
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          align-items: center;
+          text-align: center;
+          min-height: 100vh;
+          font-size: 24px;
+          padding-top: 20px;
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+        }   
+        h1 {
+          margin: 0;
+          padding: 10px 0;
+          font-size: 48px;
+        }
+        #bg {
+          position: fixed;
+          top: 0;
+          left: 0;
+          z-index: -1;
+        }
+    </style>
+    <canvas id="bg"></canvas>
+    <h1>Test</h1>
+    <hr>
+    <h3 id="writer"></h3>
+    <hr>
+    <div id="game">
+      <h3 id="choices">Choose:</h3>
+      <h4 id="hp">HP:</h4>
+      <h4 id="room">Room: </h4>
+      <div id="choice-buttons-overlay">
+        <button id="rock-hitbox" data-move="Rock" class="choice-hitbox"></button>
+        <button id="paper-hitbox" data-move="Paper" class="choice-hitbox"></button>
+        <button id="scissors-hitbox" data-move="Scissors" class="choice-hitbox"></button>
+      </div>
+    </div>  
+</body>
 </html>
