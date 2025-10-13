@@ -19,6 +19,7 @@ const HITBOXES = {
 };
 
 // --- NEW HITBOX POSITIONING & CLICK LOGIC ---
+
 /**
  * Calculates and sets the CSS (position and size) of the transparent buttons 
  * based on the current canvas dimensions and pre-calculated ratios.
@@ -109,4 +110,19 @@ export function choiceBG() {
         window.addEventListener("resize", drawAndPositionChoice);
         overlay.addEventListener('click', handleMoveClick);
     });
+}
+export function showToast(text) {
+    Toastify({
+      text: text, 
+      duration: 1500,
+      gravity: "top",
+      position: "left",
+      stopOnFocus: true,
+      style: {
+        background: "#2C3E50", 
+        color: "#795548",
+        opacity: 1, 
+        border: "2px solid #795548" 
+      },
+    }).showToast();
 }

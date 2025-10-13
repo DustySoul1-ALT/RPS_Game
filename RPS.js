@@ -1,3 +1,5 @@
+import { showToast, choiceBG, oldPaper, draw } from "./stuff";
+
 // Fate of Fists made by Mukilan M.
 // Inspired by A Dark Room by DoubleSpeak Games and Hades by Supergiant games
 // --- Game Vars with Closures ---
@@ -70,11 +72,35 @@ let load;
 Object.freeze(save)
 Object.freeze(load)
 // --- Utility Functions ---
+let enemyHP = 100;
+let enemyMaxHP = 100;
+function setEnemy(name, maxHP) {
+    enemyMaxHP = maxHP;
+    enemyHP = maxHP; // start full
+    document.getElementById("enemyName").innerText = `${name}`;
+    updateEnemyBar();
+}
+function updateEnemyBar() {
+    const bar = document.getElementById('enemyBar');
+    let percent = (enemyHP / enemyMaxHP) * 100;
+    if (percent < 0) percent = 0;
+    if (percent > 100) percent = 100;
+    bar.style.width = percent + "%";
+}
+function damageEnemy(amount) {
+    enemyHP -= amount;
+    if (enemyHP < 0) enemyHP = 0;
+    updateEnemyBar();
+}
+function healEnemy(amount) {
+    enemyHP += amount;
+    if (enemyHP > enemyMaxHP) enemyHP = enemyMaxHP;
+    updateEnemyBar();
+}
 function generateRanNum(min, max) {
   const rand = crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
   return Math.floor(rand * (max - min + 1)) + min;
 }
-
 async function keyPress(validInputs) {
   return new Promise(resolve => {
     function handler(e) {
@@ -167,12 +193,13 @@ function findChoices() {
 
   return top3;
 }
-function pickChoice() {
-  choices("Press one of the following keys: R for rock, P for paper, S for scissors");
-  const pChoice = keyPress(choiceChars);
+async function pickChoice() {
+  const playerMove = await choiceBG();
+  oldPaper()
+  const computerMove = findChoices();
   return {
-    rChoice: () => findChoices(),
-    pChoice: () => pChoice
+    rChoice: () => computerMove,
+    pChoice: () => playerMove
   };
 }
 function compare(pc, bc) {
@@ -197,7 +224,7 @@ function weightedRandom(weights) {
   return weights.length - 1;
 }
 // --- Outcome Function ---
-async function outCome(outcome, enemy, ehp, mhp) {
+async function outCome(outcome, enemy) {
   let id;
   switch (enemy) {
     case "Goblin": id = 0; break;
@@ -227,9 +254,10 @@ async function outCome(outcome, enemy, ehp, mhp) {
 }
 // --- Enemies ---
 const enimies = {
-  async fight(enemyName, weights) {
+  async fight(enemyName, weights, ehp, mhp) {
     await queueID();
     await outCome(null, enemyName);
+    setEnemy(enemyName, mhp)
 
     const pick = pickChoice();
     const playerChoices = findChoices(); // returns something like ["r","p","s"]
@@ -244,26 +272,34 @@ const enimies = {
 
     // Repeat fight only if it's a tie or player loses (no HP involved)
     if (outcome === false || outcome === "tie") {
+      if (outcome === false && ehp < mhp) {
+        healEnemy(1)
+      }
       await this.fight(enemyName, weights);
     }
-
     // Optional: announce win
     if (outcome === true) {
-      await writer(`You defeated the ${enemyName}!`, 120);
+      if (Math.max(0, ehp - 1) === 0) {
+        await writer(`You defeated the enemy!`, 120);
+      } else {
+        await writer(`You won! Enemy HP: ${ehp - 1}/${mhp}`);
+        damageEnemy(1)
+        await this.fight(enemyName, weights, ehp - 1, mhp)
+      }
     }
   },
 
   3: async function() { // Boss
-    await this.fight("Boss", [60, 30, 10]);
+    await this.fight("Boss", [60, 30, 10], 5, 5);
   },
   2: async function() { // Mini Boss
-    await this.fight("Mini Boss", [55, 30, 15]);
+    await this.fight("Mini Boss", [55, 30, 15], 3, 3);
   },
   1: async function() { // Wanderer
-    await this.fight("Wanderer", [50, 35, 15]);
+    await this.fight("Wanderer", [50, 35, 15], 2, 2);
   },
   0: async function() { // Goblin
-    await this.fight("Goblin", [40, 40, 20]);
+    await this.fight("Goblin", [40, 40, 20], 1, 1);
   },
 }
 // --- New Room ---
