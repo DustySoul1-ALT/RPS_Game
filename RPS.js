@@ -224,7 +224,7 @@ function weightedRandom(weights) {
   return weights.length - 1;
 }
 // --- Outcome Function ---
-async function outCome(outcome, enemy) {
+async function outCome(outcome, enemy, ehp, mhp) {
   let id;
   switch (enemy) {
     case "Goblin": id = 0; break;
@@ -256,7 +256,7 @@ async function outCome(outcome, enemy) {
 const enimies = {
   async fight(enemyName, weights, ehp, mhp) {
     await queueID();
-    await outCome(null, enemyName);
+    await outCome(null, enemyName, ehp, mhp);
     setEnemy(enemyName, mhp)
 
     const pick = pickChoice();
@@ -268,7 +268,7 @@ const enimies = {
     const pChoice = await pick.pChoice();
     const outcome = compare(pChoice, aiPick);
 
-    await outCome(outcome, enemyName);
+    await outCome(outcome, enemyName, ehp, mhp);
 
     // Repeat fight only if it's a tie or player loses (no HP involved)
     if (outcome === false || outcome === "tie") {
