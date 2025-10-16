@@ -1,47 +1,53 @@
 body {
-    margin: 0;
-    overflow: hidden; /* Prevent scrollbars when full-screen */
+  margin: 0;
+  overflow: hidden;
+  font-family: 'Press Start 2P', monospace;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  text-align: center;
 }
+
 #bg, #choice-buttons-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
+
 #choice-buttons-overlay {
-    z-index: 10; /* Make sure the hitboxes are on top of the canvas */
+  z-index: 10;
 }
+
 .choice-hitbox {
-    position: absolute; /* Positioned relative to the overlay */
-    background: transparent; /* Make the button invisible */
-    border: none;
-    cursor: pointer;
-    /* Optional: Uncomment the line below for debugging button placement */
-    /* background: rgba(0, 255, 0, 0.3); */ 
+  position: absolute;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
+
+h1, h2, h3, h4, #choices, #hp, #room {
+  color: #3a2c1c;
+  text-shadow: 1px 1px 0 #b59165;
+}
+
 .typewriter {
   display: inline-block;
   font-size: 20px;
   color: #00ff99;
-  white-space: pre; /* keeps spaces and line breaks */
+  white-space: pre;
   overflow: hidden;
   border-right: 2px solid #00ff99;
   animation: blink 0.75s step-end infinite;
-  letter-spacing: 0.5px;
 }
+
 @keyframes blink {
-  50% {
-    border-color: transparent;
-  }
+  50% { border-color: transparent; }
 }
-h1, h2, h3, #choices, #hp, #room {
-  font-family: 'Press Start 2P', monospace;
-  color: #3a2c1c; /* dark brown to match paper */
-  text-shadow: 1px 1px 0 #b59165; /* gives it that subtle print look */
-  letter-spacing: 1px;
-}
-.boss-bar-container {
+
+.enemy-bar-container {
   width: 80%;
   max-width: 500px;
   height: 25px;
@@ -51,15 +57,10 @@ h1, h2, h3, #choices, #hp, #room {
   overflow: hidden;
   margin: 10px 0;
 }
-.boss-bar {
+
+.enemy-bar {
   height: 100%;
   width: 100%;
   background: linear-gradient(90deg, #ff0000, #aa0000);
   transition: width 0.3s ease;
-}
-.boss-name {
-  text-align: center;
-  font-weight: bold;
-  font-size: 20px;
-  margin-bottom: 5px;
 }

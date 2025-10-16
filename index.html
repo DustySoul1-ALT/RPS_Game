@@ -1,64 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="A roguelite RPS game">
-    <meta name="author" content="Mukilan Madhusudhanan">
-    <title>Fate of Fists</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <script type="module" src="./RPS.js" defer></script>
-    <link href="./styles.css" type="stylesheet">
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fate of Fists</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <link href="./styles.css" rel="stylesheet" type="text/css">
+  <script type="module" src="./RPS.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
 <body>
-    <style>
-        body {
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-start;
-          align-items: center;
-          text-align: center;
-          min-height: 100vh;
-          font-size: 24px;
-          padding-top: 20px;
-          margin: 0;
-          padding: 0;
-          overflow: hidden;
-        }   
-        h1 {
-          margin: 0;
-          padding: 10px 0;
-          font-size: 48px;
-        }
-        #bg {
-          position: fixed;
-          top: 0;
-          left: 0;
-          z-index: -1;
-        }
-    </style>
-    <canvas id="bg"></canvas>
-    <h1>Fate of Fists</h1>
-    <hr>
-    <h3 id="writer"></h3>
-    <hr>
-    <div id="game">
-      <div id="enemy-container">
-        <div class="enemy-name" id="enemyName"></div>
-        <div class="enemy-bar-container">
-          <div class="enemy-bar" id="enemyBar"></div>
-        </div>
-      </div>
-      <h3 id="choices">Choose:</h3>
-      <h4 id="hp">HP:</h4>
-      <h4 id="room">Room: </h4>
-      <div id="choice-buttons-overlay">
-        <button id="rock-hitbox" data-move="r" class="choice-hitbox"></button>
-        <button id="paper-hitbox" data-move="p" class="choice-hitbox"></button>
-        <button id="scissors-hitbox" data-move="s" class="choice-hitbox"></button>
-      </div>
-    </div>  
+  <canvas id="bg"></canvas>
+  <h1>Fate of Fists</h1>
+  <h3 id="writer"></h3>
+  <h3 id="choices">Choose:</h3>
+  <h4 id="hp">HP:</h4>
+  <h4 id="room">Room: </h4>
+  <div id="choice-buttons-overlay">
+    <button id="rock-hitbox" data-move="r" class="choice-hitbox" style="visibility: hidden;"></button>
+    <button id="paper-hitbox" data-move="p" class="choice-hitbox" style="visibility: hidden;"></button>
+    <button id="scissors-hitbox" data-move="s" class="choice-hitbox" style="visibility: hidden;"></button>
+  </div>
+  <div id="enemy-container">
+    <div class="enemy-name" id="enemyName"></div>
+    <div class="enemy-bar-container">
+      <div class="enemy-bar" id="enemyBar"></div>
+    </div>
+  </div>
 </body>
 </html>
