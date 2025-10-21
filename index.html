@@ -4,24 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fate of Fists</title>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Knewave&display=swap" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <link href="./styles.css" rel="stylesheet" type="text/css">
   <script type="module" src="./RPS.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
 <body>
-  <canvas id="bg"></canvas>
   <h1>Fate of Fists</h1>
   <h3 id="writer"></h3>
   <h3 id="choices">Choose:</h3>
   <h4 id="hp">HP:</h4>
   <h4 id="room">Room: </h4>
-  <div id="choice-buttons-overlay">
-    <button id="rock-hitbox" data-move="r" class="choice-hitbox" style="visibility: hidden;"></button>
-    <button id="paper-hitbox" data-move="p" class="choice-hitbox" style="visibility: hidden;"></button>
-    <button id="scissors-hitbox" data-move="s" class="choice-hitbox" style="visibility: hidden;"></button>
-  </div>
+
   <div id="enemy-container">
     <div class="enemy-name" id="enemyName"></div>
     <div class="enemy-bar-container">
