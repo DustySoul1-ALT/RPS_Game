@@ -223,8 +223,6 @@ async function outCome(outcome, enemy, ehp, mhp) {
     }
   } else if (outcome === "tie") {
     await writer(`It's a tie! Enemy HP: ${ehp}/${mhp}`);
-  } else if (outcome === null) {
-    await writer(`A ${enemy} challenges you. Enemy HP: ${ehp}/${mhp}`);
   }
 }
 
@@ -232,7 +230,6 @@ async function outCome(outcome, enemy, ehp, mhp) {
 const enimies = {
   async fight(enemyName, weights, ehp, mhp) {
     await queueID();
-    await outCome(null, enemyName, ehp, mhp);
     setEnemy(enemyName, mhp);
 
     const playerChoices = findChoices();
