@@ -19,6 +19,7 @@ h1 {
 
 h3, h4 {
   margin: 5px 0;
+  font-size: 36px;
 }
 
 .enemy-bar-container {
@@ -30,13 +31,6 @@ h3, h4 {
   border-radius: 5px;
   overflow: hidden;
   margin: 10px 0;
-}
-
-.enemy-bar {
-  height: 100%;
-  width: 100%;
-  background: linear-gradient(90deg, #ff0000, #aa0000);
-  transition: width 0.3s ease;
 }
 
 .enemy-name {

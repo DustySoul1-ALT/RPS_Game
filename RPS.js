@@ -82,24 +82,19 @@ function setEnemy(name, maxHP) {
   enemyMaxHP = maxHP;
   enemyHP = maxHP;
   document.getElementById("enemyName").innerText = `${name}`;
-  updateEnemyBar();
+  updateEnemy();
 }
-
-function updateEnemyBar() {
-  const bar = document.getElementById('enemyBar');
-  let percent = (enemyHP / enemyMaxHP) * 100;
-  percent = Math.max(0, Math.min(100, percent));
-  bar.style.width = percent + "%";
+function updateEnemy() {
+  const el = document.getElementById('enemy-hp');
+  el.textContent = `Enemy HP: ${enemyHP}/${enemyMaxHP}`;
 }
-
 function damageEnemy(amount) {
   enemyHP = Math.max(0, enemyHP - amount);
-  updateEnemyBar();
+  updateEnemy();
 }
-
 function healEnemy(amount) {
   enemyHP = Math.min(enemyMaxHP, enemyHP + amount);
-  updateEnemyBar();
+  updateEnemy();
 }
 
 function generateRanNum(min, max) {
@@ -217,14 +212,14 @@ function weightedRandom(weights) {
 async function outCome(outcome, enemy, ehp, mhp) {
   if (outcome === true) {
     if (hp.get() < hp.getMax()) hp.set(hp.get() + 1);
-    await writer(`You won against a ${enemy}! Enemy HP: ${ehp}/${mhp}`);
+    await writer(`You won against a ${enemy}!`);
   } else if (outcome === false) {
     hp.set(hp.get() - 1);
     if (hp.get() <= 0) {
       await writer(`You died against a ${enemy}. Game Over!`);
       Room.set(0);
     } else {
-      await writer(`You lost against a ${enemy}. Your HP: ${hp.get()}/${hp.getMax()}`);
+      await writer(`You lost against a ${enemy}.`);
     }
   } else if (outcome === "tie") {
     await writer(`It's a tie! Enemy HP: ${ehp}/${mhp}`);
@@ -258,7 +253,7 @@ const enimies = {
       if (Math.max(0, ehp - 1) === 0) {
         await writer(`You defeated the enemy!`, 120);
       } else {
-        await writer(`You won! Enemy HP: ${ehp - 1}/${mhp}`);
+        await writer(`You won!`);
         damageEnemy(1);
         await this.fight(enemyName, weights, ehp - 1, mhp);
       }
