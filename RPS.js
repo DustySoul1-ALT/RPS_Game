@@ -1,7 +1,11 @@
-import { showToast, mt, weightedRandom, generateRanNum } from "./stuff.js";
+import { mt, weightedRandom, generateRanNum, type, data, setButtonsDisabled } from "./stuff.js";
 
 // Fate of Fists made by Mukilan M.
 // Inspired by A Dark Room by DoubleSpeak Games and Hades by Supergiant Games
+
+// --- Document stuff
+const enemyStatusEl = document.getElementById('enemy-status-text');
+const enemyHpBarEl = document.getElementById('enemy-hp-bar');
 
 // --- Game Vars with Closures ---
 const Room = (() => {
@@ -20,17 +24,27 @@ Room.set(0);
 const hp = (() => {
   let hpVal = 5;
   let maxHP = 5;
-  const hpS = document.getElementById("hp");
+  const playerHpBarEl = document.getElementById("player-hp-bar")
+  const hpSEl = document.getElementById("hp")
+  
   const api = {
     get: () => hpVal,
     set: (val) => {
-      if (typeof val === 'number') hpVal = val;
-      hpS.textContent = 'HP: ' + hpVal + '/' + maxHP;
+      // Clamps the new HP value to prevent exceeding maxHP
+      if (typeof val === 'number') hpVal = Math.min(val, maxHP); 
+      hpSEl.textContent = 'HP: ' + hpVal + '/' + maxHP;
+      
+      // Updates the visual HP bar
+      const playerPercent = (hpVal / maxHP) * 100;
+      playerHpBarEl.style.width = `${Math.max(0, playerPercent)}%`;
     },
     getMax: () => maxHP,
     setMax: (val) => {
       if (typeof val === "number") maxHP = val;
-      hpS.textContent = 'HP: ' + hpVal + '/' + maxHP;
+      hpSEl.textContent = 'HP: ' + hpVal + '/' + maxHP;
+      // Updates the HP bar when max health changes
+      const playerPercent = (hpVal / maxHP) * 100;
+      playerHpBarEl.style.width = `${Math.max(0, playerPercent)}%`;
     }
   };
   return Object.freeze(api);
@@ -62,15 +76,6 @@ const GameDB = (() => {
     clear: () => db.length = 0,
   });
 })();
-// --- Localstorage Manager ---
-const storage = (() => {
-  return Object.freeze({
-    add: (name, data) => localStorage.setItem(name, data),
-    get: (name) => {
-      return localStorage.getItem(name);
-    }
-  })
-})();
 const choiceChars = ["r", "p", "s"];
 
 // --- Utility Functions ---
@@ -86,7 +91,10 @@ const enemy = {
   },
   update: () => {
     const el = document.getElementById('enemy-hp');
-    el.textContent = `Enemy HP: ${enemyHP}/${enemyMaxHP}`;
+    const barEl = document.getElementById('enemy-hp-bar');
+    el.textContent = `HP: ${enemyHP}/${enemyMaxHP}`;
+    const enemyPercent = (enemyHP / enemyMaxHP) * 100;
+    barEl.style.width = `${Math.max(0, enemyPercent)}%`;
   },
   damage: (amount) => {
     enemyHP = Math.max(0, enemyHP - amount);
@@ -134,39 +142,30 @@ async function queueID() {
 }
 
 // --- Writer & Status Function ---
-function writer(text, speed = 120) {
-  return new Promise(resolve => {
-    const el = document.getElementById("writer");
-    if (!el) return resolve();
-    if (el.textContent.trim().toLowerCase() === text.trim().toLowerCase()) return resolve();
-    el.textContent = "";
-    let i = 0;
-    function type() {
-      if (i < text.length) {
-        el.textContent += text.charAt(i);
-        i++;
-        setTimeout(type, speed);
-      } else resolve();
-    }
-    type();
-  });
+
+async function writer(text) {
+  const FIXED_SPEED = 120;
+  const writerEl = document.getElementById("writer")
+  setButtonsDisabled(true);
+  writerEl.innerHTML = '';
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  writerEl.appendChild(cursor);
+  for (let i = 0; i < text.length; i++) {
+    writerEl.insertBefore(document.createTextNode(text.charAt(i)), cursor);
+    await new Promise(resolve => setTimeout(resolve, FIXED_SPEED));
+  }
+  writerEl.removeChild(cursor);
+  setButtonsDisabled(false);
 }
-function status(text, speed = 120) {
-  return new Promise(resolve => {
-    const el = document.getElementById("status");
-    if (!el) return resolve();
-    if (el.textContent.trim().toLowerCase() === text.trim().toLowerCase()) return resolve();
-    el.textContent = "";
-    let i = 0;
-    function type() {
-      if (i < text.length) {
-        el.textContent += text.charAt(i);
-        i++;
-        setTimeout(type, speed);
-      } else resolve();
-    }
-    type();
-  });
+async function status(text) {
+    Toastify({ 
+        text: text, 
+        duration: 2000, 
+        style: { background: "linear-gradient(to right, #007bff, #0056b3)" } 
+    }).showToast();
+    enemyStatusEl.textContent = text.replace(/<(.*?)>/g, '').substring(0, 30);
+    return new Promise(resolve => resolve());
 }
 
 // --- RPS Logic ---

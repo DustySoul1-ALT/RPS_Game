@@ -1,50 +1,72 @@
+/* Custom styles for the body and overall game frame */
 body {
+  background-color: #f8f1e4; /* light paper color */
+  color: #3a2c1c; /* dark brown, ink color */
+  font-family: 'Knewave', cursive;
+  min-height: 100vh;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  text-align: center;
-  font-family: 'Knewave', monospace;
-  color: #3a2c1c; /* dark brown, paper-style */
-  text-shadow: 1px 1px 0 #b59165;
-  background: #f8f1e4; /* light paper color */
-  margin: 0;
-  padding: 20px 0;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 1rem;
 }
 
-h1 {
-  margin: 0 0 20px 0;
-  font-size: 48px;
+.game-frame {
+    /* Maximum width and aesthetic border/shadow for a framed paper look */
+    max-width: 700px;
+    width: 100%;
+    background-color: #fffaf0; 
+    border: 8px solid #b59165; /* Parchment border */
+    box-shadow: 
+        0 0 20px rgba(0, 0, 0, 0.2), 
+        inset 0 0 10px rgba(0, 0, 0, 0.1); 
 }
 
-h3, h4 {
-  margin: 5px 0;
-  font-size: 36px;
+/* Styling for the narrative/typewriter box */
+#writer {
+  min-height: 90px;
+  font-family: 'monospace';
+  font-size: 1.1rem;
+  color: #000;
+  border-left: 3px solid #000;
+  padding-left: 10px;
+  white-space: pre-wrap;
 }
 
-.enemy-name {
-  font-weight: bold;
-  font-size: 20px;
-  margin-bottom: 5px;
-}
-
-.enemy-hp {
-  font-size: 20px;
-}
-
-.typewriter {
+/* Animation for the blinking cursor */
+.cursor {
   display: inline-block;
-  font-size: 20px;
-  color: #00ff99;
-  white-space: pre; /* keeps spaces and line breaks */
-  overflow: hidden;
-  border-right: 2px solid #00ff99;
-  animation: blink 0.75s step-end infinite;
-  letter-spacing: 0.5px;
+  width: 1px;
+  height: 1.1em;
+  background-color: #000;
+  animation: blink 0.7s step-end infinite;
+}
+@keyframes blink {
+  50% { opacity: 0; }
 }
 
-@keyframes blink {
-  50% {
-    border-color: transparent;
-  }
+/* General button styling and hover effects */
+.game-button {
+  font-family: 'Knewave', cursive;
+  font-size: 1.25rem;
+  transition: all 0.1s;
+  cursor: pointer;
+  text-shadow: 1px 1px 0 #3a2c1c;
+}
+.game-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+.game-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+}
+
+/* HP bar presentation */
+.hp-bar-container {
+    height: 12px;
+    background-color: #d1d5db; 
+    border: 1px solid #9ca3af;
+}
+.hp-bar {
+    transition: width 0.3s ease-in-out;
 }
