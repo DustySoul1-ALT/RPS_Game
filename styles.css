@@ -4,16 +4,17 @@ body {
   color: #3a2c1c; /* dark brown, ink color */
   font-family: 'Knewave', cursive;
   min-height: 100vh;
+  /* Ensure the game frame is always centered horizontally and vertically */
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center; /* Centered for better desktop viewing */
   padding: 1rem;
 }
 
 .game-frame {
     /* Maximum width and aesthetic border/shadow for a framed paper look */
     max-width: 700px;
-    width: 100%;
+    width: 100%; /* Ensures it scales down on mobile (RESPONSIVE) */
     background-color: #fffaf0; 
     border: 8px solid #b59165; /* Parchment border */
     box-shadow: 
