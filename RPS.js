@@ -1,4 +1,4 @@
-import { showToast, mt } from "./stuff.js";
+import { showToast, mt, weightedRandom, generateRanNum } from "./stuff.js";
 
 // Fate of Fists made by Mukilan M.
 // Inspired by A Dark Room by DoubleSpeak Games and Hades by Supergiant Games
@@ -74,32 +74,28 @@ const storage = (() => {
 const choiceChars = ["r", "p", "s"];
 
 // --- Utility Functions ---
-
 let enemyHP = 100;
 let enemyMaxHP = 100;
 
-function setEnemy(name, maxHP) {
-  enemyMaxHP = maxHP;
-  enemyHP = maxHP;
-  document.getElementById("enemyName").innerText = `${name}`;
-  updateEnemy();
-}
-function updateEnemy() {
-  const el = document.getElementById('enemy-hp');
-  el.textContent = `Enemy HP: ${enemyHP}/${enemyMaxHP}`;
-}
-function damageEnemy(amount) {
-  enemyHP = Math.max(0, enemyHP - amount);
-  updateEnemy();
-}
-function healEnemy(amount) {
-  enemyHP = Math.min(enemyMaxHP, enemyHP + amount);
-  updateEnemy();
-}
-
-function generateRanNum(min, max) {
-  const rand = crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
-  return Math.floor(rand * (max - min + 1)) + min;
+const enemy = {
+  set: (name, maxHP) => {
+    enemyMaxHP = maxHP;
+    enemyHP = maxHP;
+    document.getElementById("enemyName").innerText = `${name}`;
+    enemy.update();
+  },
+  update: () => {
+    const el = document.getElementById('enemy-hp');
+    el.textContent = `Enemy HP: ${enemyHP}/${enemyMaxHP}`;
+  },
+  damage: (amount) => {
+    enemyHP = Math.max(0, enemyHP - amount);
+    enemy.update();
+  },
+  heal: (amount) => {
+    enemyHP = Math.min(enemyMaxHP, enemyHP + amount)
+    enemy.update()
+  }
 }
 
 async function getKeyPress(chars) {
@@ -115,7 +111,7 @@ async function getKeyPress(chars) {
   });
 }
 
-// --- QueueID Function ---
+// --- Queue Function ---
 async function queueID() {
   return new Promise(resolve => {
     let id = generateRanNum(0, 100);
@@ -137,10 +133,27 @@ async function queueID() {
   });
 }
 
-// --- Writer Function ---
+// --- Writer & Status Function ---
 function writer(text, speed = 120) {
   return new Promise(resolve => {
     const el = document.getElementById("writer");
+    if (!el) return resolve();
+    if (el.textContent.trim().toLowerCase() === text.trim().toLowerCase()) return resolve();
+    el.textContent = "";
+    let i = 0;
+    function type() {
+      if (i < text.length) {
+        el.textContent += text.charAt(i);
+        i++;
+        setTimeout(type, speed);
+      } else resolve();
+    }
+    type();
+  });
+}
+function status(text, speed = 120) {
+  return new Promise(resolve => {
+    const el = document.getElementById("status");
     if (!el) return resolve();
     if (el.textContent.trim().toLowerCase() === text.trim().toLowerCase()) return resolve();
     el.textContent = "";
@@ -197,40 +210,31 @@ function compare(pc, bc) {
   return outcomes[pc][bc];
 }
 
-function weightedRandom(weights) {
-  const total = weights.reduce((a, b) => a + b, 0);
-  let rand = Math.random() * total;
-  let cumulative = 0;
-  for (let i = 0; i < weights.length; i++) {
-    cumulative += weights[i];
-    if (rand < cumulative) return i;
-  }
-  return weights.length - 1;
-}
-
 // --- Outcome Function ---
 async function outCome(outcome, enemy, ehp, mhp) {
   if (outcome === true) {
     if (hp.get() < hp.getMax()) hp.set(hp.get() + 1);
-    await writer(`You won against a ${enemy}!`);
+    await status(`You won against a ${enemy}!`);
   } else if (outcome === false) {
     hp.set(hp.get() - 1);
     if (hp.get() <= 0) {
-      await writer(`You died against a ${enemy}. Game Over!`);
+      await status(`You died against a ${enemy}. Game Over!`);
       Room.set(0);
     } else {
-      await writer(`You lost against a ${enemy}.`);
+      await status(`You lost against a ${enemy}.`);
+      enemy.heal(1)
     }
   } else if (outcome === "tie") {
-    await writer(`It's a tie! Enemy HP: ${ehp}/${mhp}`);
+    await status(`It's a tie! Enemy HP: ${ehp}/${mhp}`);
   }
 }
 
 // --- Enemies ---
 const enimies = {
-  async fight(enemyName, weights, ehp, mhp) {
+  async fight(enemyName, weights, ehp, mhp, first) {
     await queueID();
-    setEnemy(enemyName, mhp);
+    if (first === true) enemy.set(enemyName, mhp);
+    else enemy.set(enemyHP, ehp)
 
     const playerChoices = findChoices();
     const index = weightedRandom(weights);
@@ -243,7 +247,6 @@ const enimies = {
     await outCome(outcome, enemyName, ehp, mhp);
 
     if (outcome === false || outcome === "tie") {
-      if (outcome === false && ehp < mhp) healEnemy(1);
       await this.fight(enemyName, weights, ehp, mhp);
     }
     if (outcome === true) {
@@ -251,16 +254,14 @@ const enimies = {
         await writer(`You defeated the enemy!`, 120);
       } else {
         await writer(`You won!`);
-        damageEnemy(1);
         await this.fight(enemyName, weights, ehp - 1, mhp);
       }
     }
   },
-
-  3: async function() { await this.fight("Boss", [60, 30, 10], 5, 5); },
-  2: async function() { await this.fight("Mini Boss", [55, 30, 15], 3, 3); },
-  1: async function() { await this.fight("Wanderer", [50, 35, 15], 2, 2); },
-  0: async function() { await this.fight("Goblin", [40, 40, 20], 1, 1); },
+  3: async function() { await this.fight("Boss", [60, 30, 10], 5, 5, true); },
+  2: async function() { await this.fight("Mini Boss", [55, 30, 15], 3, 3, true); },
+  1: async function() { await this.fight("Wanderer", [50, 35, 15], 2, 2), true; },
+  0: async function() { await this.fight("Goblin", [40, 40, 20], 1, 1, true); },
 };
 
 // --- Room Loop ---

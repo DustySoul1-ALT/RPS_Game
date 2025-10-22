@@ -14,6 +14,22 @@ export function showToast(text) {
   }).showToast();
 }
 
+export function weightedRandom(weights) {
+  const total = weights.reduce((a, b) => a + b, 0);
+  let rand = Math.random() * total;
+  let cumulative = 0;
+  for (let i = 0; i < weights.length; i++) {
+    cumulative += weights[i];
+    if (rand < cumulative) return i;
+  }
+  return weights.length - 1;
+}
+
+export function generateRanNum(min, max) {
+  const rand = crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32;
+  return Math.floor(rand * (max - min + 1)) + min;
+}
+
 export const mt = (function(q, u, c) {
   function v(a,b,g){a.addEventListener?a.addEventListener(b,g,!1):a.attachEvent("on"+b,g)}
   function z(a){if("keypress"==a.type){var b=String.fromCharCode(a.which);a.shiftKey||(b=b.toLowerCase());return b}return n[a.which]?n[a.which]:r[a.which]?r[a.which]:String.fromCharCode(a.which).toLowerCase()}
