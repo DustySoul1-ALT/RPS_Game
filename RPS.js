@@ -210,17 +210,18 @@ function compare(pc, bc) {
 }
 
 // --- Outcome Function ---
-async function outCome(outcome, enemy, ehp, mhp) {
+async function outCome(outcome, enemyN, ehp, mhp) {
   if (outcome === true) {
     if (hp.get() < hp.getMax()) hp.set(hp.get() + 1);
-    await status(`You won against a ${enemy}!`);
+    await status(`You won against a ${enemyN}!`);
+    enemy.damage(1)
   } else if (outcome === false) {
     hp.set(hp.get() - 1);
     if (hp.get() <= 0) {
-      await status(`You died against a ${enemy}. Game Over!`);
+      await status(`You died against a ${enemyN}. Game Over!`);
       Room.set(0);
     } else {
-      await status(`You lost against a ${enemy}.`);
+      await status(`You lost against a ${enemyN}.`);
       enemy.heal(1)
     }
   } else if (outcome === "tie") {
