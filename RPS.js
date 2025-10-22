@@ -234,7 +234,7 @@ const enimies = {
   async fight(enemyName, weights, ehp, mhp, first) {
     await queueID();
     if (first === true) enemy.set(enemyName, mhp);
-    else enemy.set(enemyHP, ehp)
+    else enemy.set(enemyName, ehp)
 
     const playerChoices = findChoices();
     const index = weightedRandom(weights);
@@ -247,14 +247,14 @@ const enimies = {
     await outCome(outcome, enemyName, ehp, mhp);
 
     if (outcome === false || outcome === "tie") {
-      await this.fight(enemyName, weights, ehp, mhp);
+      await this.fight(enemyName, weights, ehp, mhp, false);
     }
     if (outcome === true) {
       if (Math.max(0, ehp - 1) === 0) {
         await writer(`You defeated the enemy!`, 120);
       } else {
         await writer(`You won!`);
-        await this.fight(enemyName, weights, ehp - 1, mhp);
+        await this.fight(enemyName, weights, ehp - 1, mhp, false);
       }
     }
   },
