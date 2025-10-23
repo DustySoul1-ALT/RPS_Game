@@ -10,6 +10,7 @@ const newProfileNameInput = document.getElementById('new-profile-name');
 const noProfilesEl = document.getElementById('no-profiles');
 const currentProfileNameEl = document.getElementById('current-profile-name');
 const deleteProfileNameEl = document.getElementById('delete-profile-name');
+let CURRENT_PROFILE_KEY = null;
 
 // --- STATE VARIABLE ---
 let currentProfile = null; 
@@ -128,6 +129,7 @@ function loadProfiles() {
 
 function selectProfile(profileId, data) {
     currentProfile = data;
+    CURRENT_PROFILE_KEY = profileId;
     
     document.querySelectorAll('.profile-card').forEach(card => card.classList.remove('selected'));
 
@@ -197,13 +199,17 @@ function deleteCurrentProfile() {
 // ===============================================
 
 function handleStartGameClick() {
-    window.location.replace("https://dustysoul1-alt.github.io/RPS_Game/game")
+    window.location.replace(`https://dustysoul1-alt.github.io/RPS_Game/game?profileKey=${CURRENT_PROFILE_KEY}&storageKey=${localStorage.getItem(CURRENT_PROFILE_KEY)}`)
+}
+function upgradeHall() {
+    window.location.replace(`https://dustysoul1-alt.github.io/RPS_Game/game?profileKey=${CURRENT_PROFILE_KEY}&storageKey=${localStorage.getItem(CURRENT_PROFILE_KEY)}`)
 }
 
 document.getElementById('create-profile-btn').addEventListener('click', createNewProfile);
 document.getElementById('start-game-btn').addEventListener('click', handleStartGameClick);
 document.getElementById('change-profile-btn').addEventListener('click', () => switchView('profile'));
 document.getElementById('delete-profile-btn').addEventListener('click', deleteCurrentProfile);
+document.getElementById('upgrade-hall-btn').addEventListener('click', upgradeHall)
 
 switchView('loading');
 setTimeout(() => {

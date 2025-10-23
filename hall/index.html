@@ -118,7 +118,11 @@
 
   <!-- JS -->
   <script type="module">
-    import { data, activePlayerProfile, DATA_ACTION } from './dataManager.js'; 
+    import { data, activePlayerProfile, DATA_ACTION, CURRENT_PROFILE_KEY, PROFILE_STORAGE_KEY } from '../data_manager'; 
+    // --- Get the Current Profile Key and Profile Storage Key
+    const params = new URLSearchParams(window.location.search);
+    CURRENT_PROFILE_KEY = params.get("profileKey")
+    PROFILE_STORAGE_KEY = params.get("storageKey")
 
     activePlayerProfile = data(DATA_ACTION.LOAD)
     

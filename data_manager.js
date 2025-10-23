@@ -1,6 +1,6 @@
 // --- LOCAL STORAGE KEYS (Must match the keys used in menu.js) ---
-export const PROFILE_STORAGE_KEY = 'fof_profiles';
-export const CURRENT_PROFILE_KEY = 'fof_current_profile_id';
+export let PROFILE_STORAGE_KEY = 'fof_profiles';
+export let CURRENT_PROFILE_KEY = 'fof_current_profile_id';
 
 // --- DATA ACTION TYPES ---
 export const DATA_ACTION = {

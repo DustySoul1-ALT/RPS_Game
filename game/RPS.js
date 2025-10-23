@@ -4,9 +4,16 @@ import { data, manageProfileData, CURRENT_PROFILE_KEY, PROFILE_STORAGE_KEY, acti
 // Fate of Fists made by Mukilan M.
 // Inspired by A Dark Room by DoubleSpeak Games and Hades by Supergiant Games
 
+// --- Get the Current Profile Key and Profile Storage Key
+const params = new URLSearchParams(window.location.search);
+CURRENT_PROFILE_KEY = params.get("profileKey")
+PROFILE_STORAGE_KEY = params.get("storageKey")
+
 // --- Document stuff
 const enemyStatusEl = document.getElementById('enemy-status-text');
 const enemyHpBarEl = document.getElementById('enemy-hp-bar');
+
+activePlayerProfile = data(DATA_ACTION.LOAD)
 
 // --- Game Vars with Closures ---
 const Room = (() => {
