@@ -202,7 +202,7 @@ function handleStartGameClick() {
     window.location.replace(`https://dustysoul1-alt.github.io/RPS_Game/game?profileKey=${CURRENT_PROFILE_KEY}&storageKey=${localStorage.getItem(CURRENT_PROFILE_KEY)}`)
 }
 function upgradeHall() {
-    window.location.replace(`https://dustysoul1-alt.github.io/RPS_Game/game?profileKey=${CURRENT_PROFILE_KEY}&storageKey=${localStorage.getItem(CURRENT_PROFILE_KEY)}`)
+    window.location.replace(`https://dustysoul1-alt.github.io/RPS_Game/hall?profileKey=${CURRENT_PROFILE_KEY}&storageKey=${localStorage.getItem(CURRENT_PROFILE_KEY)}`)
 }
 
 document.getElementById('create-profile-btn').addEventListener('click', createNewProfile);
