@@ -30,10 +30,6 @@ export function generateRanNum(min, max) {
   return Math.floor(rand * (max - min + 1)) + min;
 }
 
-export const type = {
-  save: () => { return 0; },
-  load: () => { return 0; }
-}
 
 const storage = (() => {
   return Object.freeze({
@@ -44,10 +40,6 @@ const storage = (() => {
   })
 })();
 
-export function data(profile, data, typeD) {
-  if (typeD === type.save) storage.add(profile, data);
-  else if (typeD === type.load) return storage.get(profile);
-}
 
 export const mt = (function(q, u, c) {
   function v(a,b,g){a.addEventListener?a.addEventListener(b,g,!1):a.attachEvent("on"+b,g)}

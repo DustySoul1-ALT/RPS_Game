@@ -1,0 +1,20 @@
+{
+    "Extra HP": {
+        "description": "Permanently increase your base maximum HP, 1 per level",
+        "max-level": 5,
+        "max-val": 5,
+        "coins": 5
+    },
+    "Extra DMG": {
+        "description": "Increases your damage modifier permanently",
+        "max-level": 1,
+        "max-val": 1,
+        "coins": 2
+    },
+    "Shadow Clone": {
+        "description": "Come back instead of dying, 1 per level",
+        "max-level": 3,
+        "max-val": 3,
+        "coins": 10
+    } 
+}

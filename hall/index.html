@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upgrade Hall</title>
+  
+  <!-- Tailwind Config must load BEFORE Tailwind -->
+  <script>
+    tailwind = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'display': ['Knewave', 'cursive'],
+            'mono': ['monospace'],
+          },
+          colors: {
+            'paper': '#f8f1e4',
+            'ink': '#3a2c1c',
+            'parchment': '#b59165',
+            'blood': '#cc3333',
+            'coin': '#fbc02d', 
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Load Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font & Toastify -->
+  <link href="https://fonts.googleapis.com/css2?family=Knewave&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+  <style>
+    body {
+      background-color: #f8f1e4; 
+      color: #3a2c1c; 
+      font-family: 'Knewave', cursive;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .game-frame {
+      max-width: 800px;
+      width: 100%;
+      background-color: #fffaf0; 
+      border: 8px solid #b59165; 
+      box-shadow: 
+          0 0 20px rgba(0, 0, 0, 0.2), 
+          inset 0 0 10px rgba(0, 0, 0, 0.1); 
+    }
+
+    .menu-button {
+      font-family: 'Knewave', cursive;
+      font-size: 1.25rem;
+      transition: all 0.1s;
+      cursor: pointer;
+      text-shadow: 1px 1px 0 #3a2c1c;
+    }
+    .menu-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+    .menu-button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body class="font-display">
+
+  <div class="game-frame p-6 rounded-lg shadow-2xl">
+    <header class="text-center mb-6">
+      <h1 class="text-5xl lg:text-6xl font-display text-ink leading-none mb-2">FATE OF FISTS Upgrade Hall</h1>
+      <hr class="border-t-4 border-parchment w-1/3 mx-auto my-4 rounded-full">
+    </header>
+
+    <!-- MENU -->
+    <div id="menu-section" class="text-center">
+      <h2 class="text-3xl font-bold mb-4">Welcome, <span id="current-profile-name" class="text-blood">Hero</span>!</h2>
+      <div class="text-xl font-mono mb-6 p-2 bg-parchment/50 rounded-lg">
+        HP: <span id="hp-display" class="font-bold">0/0</span> | 
+        Coins: <span id="coin-display" class="font-bold text-coin">0</span>
+      </div>
+      <div class="space-y-4">
+        <button id="upgrade-hall-btn" class="menu-button w-full bg-purple-600 hover:bg-purple-700 text-white p-4 rounded-xl shadow-lg">
+          Visit Upgrade Hall
+        </button>
+        <button class="menu-button w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl shadow-lg">
+          Start Run
+        </button>
+      </div>
+    </div>
+
+    <!-- UPGRADE HALL -->
+    <div id="upgrade-hall-section" class="hidden">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-3xl font-bold">Upgrade Hall</h2>
+        <div class="text-xl font-mono p-2 bg-parchment/50 rounded-lg">
+          Your Coins: <span id="upgrade-coin-display" class="font-bold text-coin">0</span>
+        </div>
+      </div>
+      
+      <div id="upgrade-list" class="space-y-4 p-4 bg-parchment/30 rounded-lg max-h-96 overflow-y-auto">
+      </div>
+
+      <button id="return-to-menu-btn" class="menu-button w-full mt-6 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-xl shadow-lg">
+        Return to Main Menu
+      </button>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script type="module">
+    import { data, activePlayerProfile, DATA_ACTION } from './dataManager.js'; 
+
+    activePlayerProfile = data(DATA_ACTION.LOAD)
+    
+    const MAX_PLAYER_HP = 5; 
+
+    const UPGRADE_DEFINITIONS = localStorage.setItem(upgrades, DEFAULT_UPGRADE_DEFINITIONS)
+
+    const menuSection = document.getElementById('menu-section');
+    const upgradeHallSection = document.getElementById('upgrade-hall-section');
+    const currentProfileNameEl = document.getElementById('current-profile-name');
+    const coinDisplayEl = document.getElementById('coin-display');
+    const hpDisplayEl = document.getElementById('hp-display');
+    const upgradeCoinDisplayEl = document.getElementById('upgrade-coin-display');
+    const upgradeListEl = document.getElementById('upgrade-list');
+
+    function showToast(text, color = '#3a2c1c') {
+      Toastify({ 
+        text, duration: 3000, 
+        style: { background: color, fontFamily: 'monospace', borderRadius: '8px'},
+        gravity: "bottom", position: "right", 
+      }).showToast();
+    }
+
+    function updateUIDisplay() {
+      if (!activePlayerProfile) return;
+      currentProfileNameEl.textContent = activePlayerProfile.profileName ?? "Hero";
+      coinDisplayEl.textContent = activePlayerProfile.coins ?? 0;
+      upgradeCoinDisplayEl.textContent = activePlayerProfile.coins ?? 0;
+      hpDisplayEl.textContent = `${activePlayerProfile.playerHP ?? 0}/${activePlayerProfile.playerMaxHP ?? 0}`;
+    }
+    
+    function switchView(view) {
+      menuSection.classList.add('hidden');
+      upgradeHallSection.classList.add('hidden');
+      if (view === 'menu') {
+        menuSection.classList.remove('hidden');
+        updateUIDisplay();
+      } else if (view === 'upgrade') {
+        upgradeHallSection.classList.remove('hidden');
+        renderUpgradeHall();
+      }
+    }
+
+    function calculateCost(name, currentLevel) {
+      const def = UPGRADE_DEFINITIONS[name];
+      if (!def) return Infinity;
+      return Math.floor(def['base-cost'] * Math.pow(def['cost-multiplier'], currentLevel));
+    }
+
+    function renderUpgradeHall() {
+      if (!activePlayerProfile) return;
+      updateUIDisplay();
+      upgradeListEl.innerHTML = '';
+      
+      Object.keys(UPGRADE_DEFINITIONS).forEach(name => {
+        const def = UPGRADE_DEFINITIONS[name];
+        const currentLevel = activePlayerProfile.upgrades?.[name] || 0;
+        const nextLevel = currentLevel + 1;
+        const isMaxed = currentLevel >= def['max-level'];
+        const nextCost = calculateCost(name, currentLevel);
+        const canAfford = (activePlayerProfile.coins ?? 0) >= nextCost;
+
+        let buttonClass = 'bg-green-600 hover:bg-green-700';
+        let buttonText = `Buy (${nextCost} Coins)`;
+
+        if (isMaxed) {
+          buttonClass = 'bg-gray-400 cursor-not-allowed';
+          buttonText = 'MAX LEVEL';
+        } else if (!canAfford) {
+          buttonClass = 'bg-red-500 hover:bg-red-600';
+          buttonText = `Need ${nextCost - activePlayerProfile.coins} More`;
+        }
+
+        const currentValueRaw = def['val-per-level'] * currentLevel;
+        const nextValueRaw = def['val-per-level'] * nextLevel;
+        const valueFormat = (name === "Shadow Clone") ? ' % chance' : ''; 
+        const currentValue = (name === "Shadow Clone") ? (currentValueRaw * 100).toFixed(0) : currentValueRaw.toFixed(0);
+        const nextValue = (name === "Shadow Clone") ? (nextValueRaw * 100).toFixed(0) : nextValueRaw.toFixed(0);
+        
+        const valueText = isMaxed 
+          ? `Total Effect: +${currentValue}${valueFormat}`
+          : `Next Effect: +${nextValue}${valueFormat} (Current: +${currentValue}${valueFormat})`;
+
+        const card = document.createElement('div');
+        card.className = 'p-4 bg-white rounded-lg shadow-md border border-ink/20 flex flex-col sm:flex-row justify-between items-center';
+        card.innerHTML = `
+          <div class="flex-grow w-full sm:w-auto mb-3 sm:mb-0">
+            <h3 class="text-xl font-bold">${name} <span class="text-sm font-mono text-parchment ml-2">Lvl ${currentLevel}/${def['max-level']}</span></h3>
+            <p class="text-sm text-ink/70 mt-1">${def.description}</p>
+            <p class="text-sm font-mono mt-2 text-blood">${valueText}</p>
+          </div>
+          <button 
+            data-upgrade="${name}"
+            class="upgrade-button menu-button text-white p-2 rounded-lg shadow-md w-full sm:w-48 ${buttonClass} ${isMaxed || !canAfford ? 'opacity-70' : ''}"
+            ${isMaxed || !canAfford ? 'disabled' : ''}
+          >
+            ${buttonText}
+          </button>
+        `;
+        upgradeListEl.appendChild(card);
+      });
+
+      document.querySelectorAll('.upgrade-button').forEach(btn => {
+        btn.addEventListener('click', handlePurchase);
+      });
+    }
+
+    function handlePurchase(event) {
+      if (!activePlayerProfile) return;
+      const upgradeName = event.target.getAttribute('data-upgrade');
+      const def = UPGRADE_DEFINITIONS[upgradeName];
+      if (!def) return;
+      
+      const currentLevel = activePlayerProfile.upgrades?.[upgradeName] || 0;
+      const cost = calculateCost(upgradeName, currentLevel);
+      
+      if (activePlayerProfile.coins < cost) {
+        showToast("Insufficient Coins!", '#cc3333');
+        return;
+      }
+
+      activePlayerProfile.coins -= cost;
+      activePlayerProfile.upgrades[upgradeName] = currentLevel + 1;
+
+      if (upgradeName === "Extra HP") {
+        activePlayerProfile.playerMaxHP = MAX_PLAYER_HP + activePlayerProfile.upgrades[upgradeName];
+        activePlayerProfile.playerHP = activePlayerProfile.playerMaxHP;
+      }
+
+      data(DATA_ACTION.SAVE, activePlayerProfile);
+      showToast(`${upgradeName} upgraded to Lvl ${currentLevel + 1}!`, '#00a359');
+      renderUpgradeHall();
+    }
+
+    function initialize() {
+      data(DATA_ACTION.LOAD);
+      if (activePlayerProfile) {
+        updateUIDisplay();
+        switchView('menu');
+      } else {
+        console.error("Failed to load profile via dataManager.js");
+        showToast("Error loading profile data.", '#cc3333');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('upgrade-hall-btn').addEventListener('click', () => switchView('upgrade'));
+      document.getElementById('return-to-menu-btn').addEventListener('click', () => switchView('menu'));
+      initialize();
+    });
+    // Helper to recursively wrap objects in a Proxy
+    function makeReactive(obj, callback) {
+      return new Proxy(obj, {
+        get(target, prop) {
+          const value = target[prop];
+          // Only wrap objects, not primitives
+          if (value && typeof value === 'object' && !value.__isProxy) {
+            target[prop] = makeReactive(value, callback);
+            target[prop].__isProxy = true; // mark to avoid infinite recursion
+          }
+          return target[prop];
+        },
+        set(target, prop, value) {
+          target[prop] = value;
+          callback(target);
+          return true;
+        },
+        deleteProperty(target, prop) {
+          delete target[prop];
+          callback(target);
+          return true;
+        }
+      });
+    }
+    makeReactive(activePlayerProfile, () => {
+        data(DATA_ACTION.SAVE)
+    })
+  </script>
+</body>
+</html>

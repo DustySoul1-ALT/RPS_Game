@@ -1,4 +1,5 @@
-import { mt, weightedRandom, generateRanNum, type, data, setButtonsDisabled } from "./stuff.js";
+import { mt, weightedRandom, generateRanNum, setButtonsDisabled } from "./stuff.js";
+import { data, manageProfileData, CURRENT_PROFILE_KEY, PROFILE_STORAGE_KEY, activePlayerProfile } from "../data_manager.js";
 
 // Fate of Fists made by Mukilan M.
 // Inspired by A Dark Room by DoubleSpeak Games and Hades by Supergiant Games
@@ -33,6 +34,7 @@ const hp = (() => {
       // Clamps the new HP value to prevent exceeding maxHP
       if (typeof val === 'number') hpVal = Math.min(val, maxHP); 
       hpSEl.textContent = 'HP: ' + hpVal + '/' + maxHP;
+      activePlayerProfile.playerHP = hpVal
       
       // Updates the visual HP bar
       const playerPercent = (hpVal / maxHP) * 100;
@@ -106,18 +108,36 @@ const enemy = {
   }
 }
 
-async function getKeyPress(chars) {
+async function getKeyPress(validMoves) {
   return new Promise((resolve) => {
-    function waitForKey(e) {
-      if (chars.includes(e.key)) {
-        document.removeEventListener('keydown', waitForKey);
-        resolve(e.key); // resolves with the key pressed
+    function handleKey(e) {
+      const key = e.key.toLowerCase();
+      if (validMoves.includes(key)) {
+        cleanup();
+        resolve(key);
       }
     }
 
-    document.addEventListener('keydown', waitForKey);
+    function handleClick(e) {
+      const btn = e.target.closest('button[data-move]');
+      if (!btn) return;
+      const move = btn.dataset.move;
+      if (validMoves.includes(move)) {
+        cleanup();
+        resolve(move);
+      }
+    }
+
+    function cleanup() {
+      document.removeEventListener('keydown', handleKey);
+      document.removeEventListener('click', handleClick);
+    }
+
+    document.addEventListener('keydown', handleKey);
+    document.addEventListener('click', handleClick);
   });
 }
+
 
 // --- Queue Function ---
 async function queueID() {
@@ -252,6 +272,7 @@ const enimies = {
     if (outcome === true) {
       if (Math.max(0, ehp - 1) === 0) {
         await writer(`You defeated the enemy!`, 120);
+        activePlayerProfile.coins = activePlayerProfile.coins + generateRanNum(1, 10)
       } else {
         await writer(`You won!`);
         await this.fight(enemyName, weights, ehp - 1, mhp, false);
@@ -290,4 +311,45 @@ async function newRoom() {
   }
 }
 
-newRoom();
+// --- Initialize the game ---
+function initializeGame() {
+  const loadedProfile = data(DATA_ACTION.LOAD); 
+  if (loadedProfile) {
+      activePlayerProfile = loadedProfile;
+      console.log(`Game starting for: ${activePlayerProfile.profileName}`);
+      if (activePlayerProfile.inRun === true) console.log(`Resuming at Room: ${activePlayerProfile.room}`);
+      newRoom();
+  } else {
+      alert("Error loading profile. Returning to menu.");
+      window.location.href = '/'; 
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initializeGame);
+
+function makeReactive(obj, callback) {
+  return new Proxy(obj, {
+    get(target, prop) {
+      const value = target[prop];
+      // Only wrap objects, not primitives
+      if (value && typeof value === 'object' && !value.__isProxy) {
+        target[prop] = makeReactive(value, callback);
+        target[prop].__isProxy = true; // mark to avoid infinite recursion
+      }
+      return target[prop];
+    },
+    set(target, prop, value) {
+      target[prop] = value;
+      callback(target);
+      return true;
+    },
+    deleteProperty(target, prop) {
+      delete target[prop];
+      callback(target);
+      return true;
+    }
+  });
+}
+makeReactive(activePlayerProfile, () => {
+    data(DATA_ACTION.SAVE)
+})
