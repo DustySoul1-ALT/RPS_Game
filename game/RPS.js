@@ -1,5 +1,5 @@
 import { mt, weightedRandom, generateRanNum, setButtonsDisabled } from "./stuff.js";
-import { data, manageProfileData, CURRENT_PROFILE_KEY, PROFILE_STORAGE_KEY, activePlayerProfile, DATA_ACTION } from "../data_manager.js";
+import { data, manageProfileData, activePlayerProfile, DATA_ACTION } from "../data_manager.js";
 
 // Fate of Fists made by Mukilan M.
 // Inspired by A Dark Room by DoubleSpeak Games and Hades by Supergiant Games
