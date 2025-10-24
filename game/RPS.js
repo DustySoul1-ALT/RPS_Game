@@ -6,14 +6,13 @@ import { data, manageProfileData, CURRENT_PROFILE_KEY, PROFILE_STORAGE_KEY, acti
 
 // --- Get the Current Profile Key and Profile Storage Key
 const params = new URLSearchParams(window.location.search);
-CURRENT_PROFILE_KEY = params.get("profileKey")
-PROFILE_STORAGE_KEY = params.get("storageKey")
+const keys = [params.get("profileKey"), params.get("storageKey")]
 
 // --- Document stuff
 const enemyStatusEl = document.getElementById('enemy-status-text');
 const enemyHpBarEl = document.getElementById('enemy-hp-bar');
 
-activePlayerProfile = data(DATA_ACTION.LOAD)
+activePlayerProfile = data(DATA_ACTION.LOAD, keys)
 
 // --- Game Vars with Closures ---
 const Room = (() => {
@@ -320,7 +319,7 @@ async function newRoom() {
 
 // --- Initialize the game ---
 function initializeGame() {
-  const loadedProfile = data(DATA_ACTION.LOAD); 
+  const loadedProfile = data(DATA_ACTION.LOAD, keys); 
   if (loadedProfile) {
       activePlayerProfile = loadedProfile;
       console.log(`Game starting for: ${activePlayerProfile.profileName}`);
@@ -358,9 +357,9 @@ function makeReactive(obj, callback) {
   });
 }
 makeReactive(activePlayerProfile, () => {
-    data(DATA_ACTION.SAVE)
+    data(DATA_ACTION.SAVE, keys)
 })
 
 window.addEventListener('beforeunload', (event) => {
-  data(DATA_ACTION.SAVE)
+  data(DATA_ACTION.SAVE, keys)
 });

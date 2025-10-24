@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upgrade Hall</title>
+  <title>Fate of Fists - Upgrades</title>
   
   <!-- Tailwind Config must load BEFORE Tailwind -->
   <script>
@@ -118,13 +118,12 @@
 
   <!-- JS -->
   <script type="module">
-    import { data, activePlayerProfile, DATA_ACTION, CURRENT_PROFILE_KEY, PROFILE_STORAGE_KEY } from '../data_manager'; 
+    import { data, activePlayerProfile, DATA_ACTION } from '../data_manager'; 
     // --- Get the Current Profile Key and Profile Storage Key
     const params = new URLSearchParams(window.location.search);
-    CURRENT_PROFILE_KEY = params.get("profileKey")
-    PROFILE_STORAGE_KEY = params.get("storageKey")
+    const keys = [params.get("profileKey"), params.get("storageKey")]
 
-    activePlayerProfile = data(DATA_ACTION.LOAD)
+    activePlayerProfile = data(DATA_ACTION.LOAD, keys)
     
     const MAX_PLAYER_HP = 5; 
 
@@ -252,13 +251,13 @@
         activePlayerProfile.playerHP = activePlayerProfile.playerMaxHP;
       }
 
-      data(DATA_ACTION.SAVE, activePlayerProfile);
+      data(DATA_ACTION.SAVE, keys, activePlayerProfile);
       showToast(`${upgradeName} upgraded to Lvl ${currentLevel + 1}!`, '#00a359');
       renderUpgradeHall();
     }
 
     function initialize() {
-      data(DATA_ACTION.LOAD);
+      data(DATA_ACTION.LOAD, keys);
       if (activePlayerProfile) {
         updateUIDisplay();
         switchView('menu');
@@ -298,7 +297,7 @@
       });
     }
     makeReactive(activePlayerProfile, () => {
-        data(DATA_ACTION.SAVE)
+        data(DATA_ACTION.SAVE, keys)
     })
   </script>
 </body>

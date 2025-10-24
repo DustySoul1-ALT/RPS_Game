@@ -1,7 +1,3 @@
-// --- LOCAL STORAGE KEYS (Must match the keys used in menu.js) ---
-export let PROFILE_STORAGE_KEY = 'fof_profiles';
-export let CURRENT_PROFILE_KEY = 'fof_current_profile_id';
-
 // --- DATA ACTION TYPES ---
 export const DATA_ACTION = {
     LOAD: 'load', // Action to retrieve the current profile
@@ -25,7 +21,7 @@ export let activePlayerProfile = null;
  * @param {Object} [profileDataToSave=null] The profile object to save (only needed for SAVE action).
  * @returns {Object|null} The loaded profile object for the LOAD action, or null on failure.
  */
-export function manageProfileData(action, profileDataToSave = null) {
+export function manageProfileData(action, profileDataToSave = null, PROFILE_STORAGE_KEY, CURRENT_PROFILE_KEY) {
     
     try {
         // 1. Get the ID of the profile the user selected on the menu page.
@@ -87,8 +83,8 @@ export function manageProfileData(action, profileDataToSave = null) {
  * @param {Object} [profileData] Required only for SAVE action, the updated profile object.
  * @returns {Object|null} Loaded profile object for LOAD action, or undefined/null.
  */
-export function data(typeD, profileData = null) {
+export function data(typeD, keys, profileData = null) {
     // We only need the action type and optionally the data to save.
     // The profile ID is determined internally using CURRENT_PROFILE_KEY.
-    return manageProfileData(typeD, profileData);
+    return manageProfileData(typeD, profileData, keys[0], keys[1]);
 }

@@ -1,5 +1,5 @@
 // --- GLOBAL CONSTANTS ---
-const PROFILE_STORAGE_KEY = 'fof_profiles';
+let PROFILE_STORAGE_KEY = 'fof_profiles';
 
 // --- GLOBAL DOM REFERENCES ---
 const loadingSection = document.getElementById('loading-section');
