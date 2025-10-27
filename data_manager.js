@@ -4,11 +4,19 @@ export const DATA_ACTION = {
     SAVE: 'save'  // Action to overwrite the current profile data
 };
 
+export const change_types = {
+    one: 'one',
+    whole: 'whole'
+}
 // *************************************************************
 // 1. THIS is where you store the object. 
 // It is accessible by all functions in this file.
 // *************************************************************
-export let activePlayerProfile = null; 
+export let activePlayerProfile = null;
+export function changeActivePlayerProfile(type, data) {
+    if (type === change_types.whole) activePlayerProfile = data;
+    else Object.assign(activePlayerProfile, data);
+}
 
 // ===============================================
 // CORE DATA MANAGEMENT FUNCTION

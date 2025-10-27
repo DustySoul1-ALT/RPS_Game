@@ -1,5 +1,5 @@
 import { mt, weightedRandom, generateRanNum, setButtonsDisabled } from "./stuff.js";
-import { data, manageProfileData, activePlayerProfile, DATA_ACTION } from "../data_manager.js";
+import { data, manageProfileData, activePlayerProfile, changeActivePlayerProfile, change_types, DATA_ACTION } from "../data_manager.js";
 
 // Fate of Fists made by Mukilan M.
 // Inspired by A Dark Room by DoubleSpeak Games and Hades by Supergiant Games
@@ -12,7 +12,7 @@ const keys = [params.get("profileKey"), params.get("storageKey")]
 const enemyStatusEl = document.getElementById('enemy-status-text');
 const enemyHpBarEl = document.getElementById('enemy-hp-bar');
 
-activePlayerProfile = data(DATA_ACTION.LOAD, keys)
+changeActivePlayerProfile(change_types.whole, data(DATA_ACTION.LOAD, keys))
 
 // --- Game Vars with Closures ---
 const Room = (() => {
@@ -40,7 +40,7 @@ const hp = (() => {
       // Clamps the new HP value to prevent exceeding maxHP
       if (typeof val === 'number') hpVal = Math.min(val, maxHP); 
       hpSEl.textContent = 'HP: ' + hpVal + '/' + maxHP;
-      activePlayerProfile.playerHP = hpVal
+      changeActivePlayerProfile({ playerHP: hpVal })
       
       // Updates the visual HP bar
       const playerPercent = (hpVal / maxHP) * 100;
@@ -278,7 +278,10 @@ const enimies = {
     if (outcome === true) {
       if (Math.max(0, ehp - 1) === 0) {
         await writer(`You defeated the enemy!`, 120);
-        activePlayerProfile.coins = activePlayerProfile.coins + generateRanNum(1, 10)
+        changeActivePlayerProfile({
+          coins: activePlayerProfile.coins + generateRanNum(1, 10)
+        });
+
       } else {
         await writer(`You won!`);
         await this.fight(enemyName, weights, ehp - 1, mhp, false);
@@ -321,7 +324,7 @@ async function newRoom() {
 function initializeGame() {
   const loadedProfile = data(DATA_ACTION.LOAD, keys); 
   if (loadedProfile) {
-      activePlayerProfile = loadedProfile;
+      changeActivePlayerProfile(change_types.one, loadedProfile);
       console.log(`Game starting for: ${activePlayerProfile.profileName}`);
       if (activePlayerProfile.inRun === true) console.log(`Resuming at Room: ${activePlayerProfile.room}`);
       newRoom();
