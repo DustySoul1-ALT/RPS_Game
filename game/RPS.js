@@ -114,7 +114,7 @@ const enemy = {
   },
   damage: (amount) => {
     enemyHP = Math.max(0, enemyHP - amount);
-    enemy.update(false);
+    if (enemyHP !== 0) enemy.update(false);
   },
   heal: (amount) => {
     enemyHP = Math.min(enemyMaxHP, enemyHP + amount)
