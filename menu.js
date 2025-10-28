@@ -199,6 +199,7 @@ function deleteCurrentProfile() {
 // ===============================================
 
 function handleStartGameClick() {
+    sessionStorage.setItem("CURRENT_PROFILE_KEY", CURRENT_PROFILE_KEY);
     window.location.replace(`https://dustysoul1-alt.github.io/RPS_Game/game?profileKey=${CURRENT_PROFILE_KEY}&storageKey=${localStorage.getItem(CURRENT_PROFILE_KEY)}`)
 }
 function upgradeHall() {

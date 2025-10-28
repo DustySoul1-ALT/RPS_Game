@@ -41,11 +41,10 @@ function ifLoop(checkFn, interval = 100) {
  * @param {Object} [profileDataToSave=null] The profile object to save (only needed for SAVE action).
  * @returns {Object|null} The loaded profile object for the LOAD action, or null on failure.
  */
-export async function manageProfileData(action, profileDataToSave = null, PROFILE_STORAGE_KEY, CURRENT_PROFILE_KEY) {
+export async function manageProfileData(action, profileDataToSave = null, PROFILE_STORAGE_KEY, activeProfileId) {
     await ifLoop(() => activePlayerProfile !== "placeholder")
     try {
         // 1. Get the ID of the profile the user selected on the menu page.
-        const activeProfileId = localStorage.getItem(CURRENT_PROFILE_KEY);
         if (!activeProfileId) {
             console.error("Data action failed: No active profile ID found in local storage. Returning to menu.");
             // Note: In a real game, you would redirect to the menu here.
@@ -106,5 +105,5 @@ export async function manageProfileData(action, profileDataToSave = null, PROFIL
 export function data(typeD, keys, profileData = null) {
     // We only need the action type and optionally the data to save.
     // The profile ID is determined internally using CURRENT_PROFILE_KEY.
-    return manageProfileData(typeD, profileData, keys[0], keys[1]);
+    return manageProfileData(typeD, profileData, keys[0], keys[1], keys[0]);
 }
