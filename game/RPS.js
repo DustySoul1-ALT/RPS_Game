@@ -5,8 +5,16 @@ import { data, manageProfileData, activePlayerProfile, changeActivePlayerProfile
 // Inspired by A Dark Room by DoubleSpeak Games and Hades by Supergiant Games
 
 // --- Get the Current Profile Key and Profile Storage Key
-const params = new URLSearchParams(window.location.search);
-const keys = [params.get("profileKey"), params.get("storageKey")]
+let params;
+try {
+  params = new URLSearchParams(window.location.search);
+} catch {
+  params = new URLSearchParams(); // empty fallback
+}
+
+
+const keys = [params.get("profileKey") ?? "error", params.get("storageKey") ?? "error"]
+history.pushState({ page: 'game' }, "", '/RPS_Game/game');
 
 // --- Document stuff
 const enemyStatusEl = document.getElementById('enemy-status-text');
@@ -336,33 +344,9 @@ function initializeGame() {
 
 document.addEventListener('DOMContentLoaded', initializeGame);
 
-function makeReactive(obj, callback) {
-  return new Proxy(obj, {
-    get(target, prop) {
-      const value = target[prop];
-      // Only wrap objects, not primitives
-      if (value && typeof value === 'object' && !value.__isProxy) {
-        target[prop] = makeReactive(value, callback);
-        target[prop].__isProxy = true; // mark to avoid infinite recursion
-      }
-      return target[prop];
-    },
-    set(target, prop, value) {
-      target[prop] = value;
-      callback(target);
-      return true;
-    },
-    deleteProperty(target, prop) {
-      delete target[prop];
-      callback(target);
-      return true;
-    }
-  });
-}
-makeReactive(activePlayerProfile, () => {
-    data(DATA_ACTION.SAVE, keys)
-})
+setInterval(data, 250, DATA_ACTION.SAVE, keys, activePlayerProfile)
 
-window.addEventListener('beforeunload', (event) => {
-  data(DATA_ACTION.SAVE, keys)
+
+window.addEventListener('beforeunload', () => {
+  data(DATA_ACTION.SAVE, keys, activePlayerProfile)
 });
