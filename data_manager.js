@@ -12,11 +12,23 @@ export const change_types = {
 // 1. THIS is where you store the object. 
 // It is accessible by all functions in this file.
 // *************************************************************
-export let activePlayerProfile = null;
+export let activePlayerProfile = "placeholder";
 export function changeActivePlayerProfile(type, data) {
     if (type === change_types.whole) activePlayerProfile = data;
     else Object.assign(activePlayerProfile, data);
 }
+
+function ifLoop(checkFn, interval = 100) {
+  return new Promise(resolve => {
+    const loop = setInterval(() => {
+      if (checkFn()) {
+        clearInterval(loop);
+        resolve();
+      }
+    }, interval);
+  });
+}
+
 
 // ===============================================
 // CORE DATA MANAGEMENT FUNCTION
@@ -29,8 +41,8 @@ export function changeActivePlayerProfile(type, data) {
  * @param {Object} [profileDataToSave=null] The profile object to save (only needed for SAVE action).
  * @returns {Object|null} The loaded profile object for the LOAD action, or null on failure.
  */
-export function manageProfileData(action, profileDataToSave = null, PROFILE_STORAGE_KEY, CURRENT_PROFILE_KEY) {
-    
+export async function manageProfileData(action, profileDataToSave = null, PROFILE_STORAGE_KEY, CURRENT_PROFILE_KEY) {
+    await ifLoop(() => activePlayerProfile !== "placeholder")
     try {
         // 1. Get the ID of the profile the user selected on the menu page.
         const activeProfileId = localStorage.getItem(CURRENT_PROFILE_KEY);
