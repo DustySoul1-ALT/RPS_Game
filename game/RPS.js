@@ -103,22 +103,22 @@ const enemy = {
     enemyMaxHP = maxHP;
     enemyHP = maxHP;
     document.getElementById("enemyName").innerText = `${name}`;
-    enemy.update();
+    enemy.update(true);
   },
-  update: () => {
+  update: (first) => {
     const el = document.getElementById('enemy-hp');
     const barEl = document.getElementById('enemy-hp-bar');
     el.textContent = `HP: ${enemyHP}/${enemyMaxHP}`;
     const enemyPercent = (enemyHP / enemyMaxHP) * 100;
-    barEl.style.width = `${Math.max(0, enemyPercent)}%`;
+    if (first === true) barEl.style.width = `${Math.max(0, enemyPercent)}%`;
   },
   damage: (amount) => {
     enemyHP = Math.max(0, enemyHP - amount);
-    enemy.update();
+    enemy.update(false);
   },
   heal: (amount) => {
     enemyHP = Math.min(enemyMaxHP, enemyHP + amount)
-    enemy.update()
+    enemy.update(false)
   }
 }
 
@@ -268,7 +268,6 @@ const enimies = {
   async fight(enemyName, weights, ehp, mhp, first) {
     await queueID();
     if (first === true) enemy.set(enemyName, mhp);
-    else enemy.set(enemyName, ehp)
 
     const playerChoices = findChoices();
     const index = weightedRandom(weights);
